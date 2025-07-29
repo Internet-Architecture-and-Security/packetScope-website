@@ -19,6 +19,8 @@ export default withNextra({
   images: {
     unoptimized: true
   },
+  // 使用相对路径，让站点在任何路径下都能工作
+  assetPrefix: './',
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
