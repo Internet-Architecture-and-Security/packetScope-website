@@ -14,6 +14,11 @@ export default withNextra({
     // 允许 build 时跳过 TS 错误
     ignoreBuildErrors: true,
   },
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
