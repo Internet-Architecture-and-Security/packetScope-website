@@ -12,7 +12,7 @@ const banner = <Banner storageKey="some-key">PacketScope 1.0 is released 🎉</B
 const navbar = (
 <Navbar
   logo={
-    <Image src={"/logonew.svg"} alt='logo'        width={40}
+    <Image src={"/packetScope-website/logonew.svg"} alt='logo'        width={40}
     />
   }
   // logo={

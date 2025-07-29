@@ -83,7 +83,7 @@ export default function Home() {
       description: "Track connection/packet interactions through the protocol stack and generate detailed visual path maps",
       color: "from-blue-500 to-cyan-500",
       highlight: "Real-time visibility",
-      img: '/Tracer.png',
+      img: 'Tracer.png',
     },
     {
       icon: BarChart3,
@@ -92,7 +92,7 @@ export default function Home() {
       description: "Provide multi-dimensional statistics on packet movement including traffic, latency, and cross-layer interactions",
       color: "from-purple-500 to-pink-500",
       highlight: "Deep insights",
-      img: '/Analyzer.png',
+      img: 'Analyzer.png',
     },
     {
       icon: MapPin,
@@ -101,7 +101,7 @@ export default function Home() {
       description: "Map routes and latency from host to any global IP address, displaying data on global topology",
       color: "from-green-500 to-emerald-500",
       highlight: "Global mapping",
-      img: '/Locator.png',
+      img: 'Locator.png',
     },
     {
       icon: ShieldCheck,
@@ -110,7 +110,7 @@ export default function Home() {
       description: "Filter and control abnormal packets using customizable rules with LLM-powered contextual insights",
       color: "from-orange-500 to-red-500",
       highlight: "AI-powered defense",
-      img: '/Guarder.png',
+      img: 'Guarder.png',
     }
   ];
 

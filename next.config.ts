@@ -1,5 +1,8 @@
 import nextra from 'nextra'
  
+const isProduction = process.env.NODE_ENV === 'production'
+const isGithubPages = process.env.GITHUB_ACTIONS === 'true'
+
 // Set up Nextra with its configuration
 const withNextra = nextra({
   // ... Add Nextra-specific options here
@@ -19,8 +22,19 @@ export default withNextra({
   images: {
     unoptimized: true
   },
-  // 使用相对路径，让站点在任何路径下都能工作
-  assetPrefix: './',
+  // 开发环境：不设置 assetPrefix，使用默认的绝对路径
+  // 生产环境：使用相对路径以支持 GitHub Pages 子路径部署
+  // ...(isProduction && {
+  // 明确指定 GitHub Pages 的子路径
+  basePath: '/packetScope-website',
+  assetPrefix: '/packetScope-website/',
+  // }),
+  
+  // 可选：如果需要在特定情况下使用 basePath
+  // ...(isGithubPages && {
+  //   basePath: '/packetScope-website',
+  //   assetPrefix: '/packetScope-website/',
+  // }),
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
