@@ -101,7 +101,7 @@ export default function Home() {
       description: "Map routes and latency from host to any global IP address, displaying data on global topology",
       color: "from-green-500 to-emerald-500",
       highlight: "Global mapping",
-      img: 'Locator.png',
+      img: 'locator.png',
     },
     {
       icon: ShieldCheck,
@@ -110,7 +110,7 @@ export default function Home() {
       description: "Filter and control abnormal packets using customizable rules with LLM-powered contextual insights",
       color: "from-orange-500 to-red-500",
       highlight: "AI-powered defense",
-      img: 'Guarder.png',
+      img: 'guarder.png',
     }
   ];
 
