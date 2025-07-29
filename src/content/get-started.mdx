@@ -1,0 +1,68 @@
+import { Steps } from 'nextra/components'
+
+# Get Started
+
+## Start Server Modules
+
+This project includes multiple server-side modules implemented in different languages. Follow the instructions in each module’s `README.md` to install dependencies and start services.
+
+```bash
+modules
+├── Analyzer  # Python-based protocol stack analysis module
+├── Guarder   # Go-based security policy module
+├── Locator   # Python-based network path mapping module
+└── Tracer    # Python-based traffic monitoring and fine-grained tracing module
+```
+
+## Start Frontend Service
+
+<Steps>
+
+The frontend is built on [Node.js](https://nodejs.org/en). Please ensure Node.js (version ≥ 16) is installed.
+
+### Install Dependencies
+
+Run the following command in the project root:
+
+```sh npm2yarn
+npm install
+```
+> [!NOTE]
+>
+> For users in mainland China, set npm mirror to speed up installation:
+> ```bash
+> npm config set registry http://registry.npmmirror.com
+> ```
+>
+
+
+### Start Preview Server
+
+```sh npm2yarn
+npm run preview
+```
+
+The application runs locally by default on port `4173`.
+
+### Access the App
+
+Open your browser and visit:
+
+```
+http://localhost:4173/
+```
+> [!TIP]
+>
+> To run in development mode with hot reloading, use the following command:
+
+```sh npm2yarn
+npm run dev
+```
+> [!TIP]
+>
+> To build the project for production, use the following command:
+
+```sh npm2yarn
+npm run build
+```
+</Steps>

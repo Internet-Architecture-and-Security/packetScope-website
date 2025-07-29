@@ -1,0 +1,161 @@
+import { Steps } from 'nextra/components'
+
+# Analyzer
+
+Provide multi-dimensional statistics on packet movement including traffic, latency, and cross-layer interactions for comprehensive network analysis. **Deep insights**、**Protocol Stack Analysis Engine**.
+
+## Overview
+
+The Analyzer module provides real-time statistical analysis of packet flows within the protocol stack through HTTP API interfaces. It delivers multi-dimensional insights including packet volume, latency measurements, cross-layer interaction frequencies, and packet loss statistics across different network layers.
+
+## Key Features
+
+- **Multi-layer Analysis**: Statistics across data link, network, and transport layers
+- **Real-time Monitoring**: Live packet flow analysis and reporting
+- **Cross-layer Metrics**: Inter-layer delay and interaction frequency tracking
+- **Packet Loss Detection**: Comprehensive drop rate monitoring
+- **Five-tuple Analysis**: Detailed flow-based statistics
+- **HTTP API Interface**: RESTful endpoints for data access and export
+
+## 📦 Dependencies
+
+This module depends on [BCC (BPF Compiler Collection)](https://github.com/iovisor/bcc) for eBPF-based kernel-level data collection.
+
+### System Requirements
+
+- **Operating System**: Linux with kernel version ≥ 6.8 (for eBPF support)
+- **Privileges**: Root/administrator access required
+- **Python**: Python 3.7 or higher
+
+### Installation Steps
+<Steps>
+##### Install BCC dependencies
+
+   Follow the official installation guide: [INSTALL.md](https://github.com/iovisor/bcc/blob/master/INSTALL.md)
+
+   For common distributions:
+
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+   
+   # CentOS/RHEL
+   sudo yum install bcc-tools kernel-devel-$(uname -r)
+   
+   # Fedora
+   sudo dnf install bcc-tools kernel-devel-$(uname -r)
+   ```
+
+##### Set up Python environment
+
+   ```bash
+   # Create virtual environment
+   python3 -m venv .venv
+   
+   # Activate virtual environment
+   source .venv/bin/activate
+   
+   # Install Python dependencies
+   pip install -r requirements.txt
+   ```
+</Steps>
+
+## 🚀 Running the Module
+
+### Prerequisites
+
+- Ensure you have root privileges
+- Verify eBPF support: `sudo dmesg | grep -i bpf`
+- Check kernel version: `uname -r` (should be ≥ 6.8)
+
+### Startup Process
+<Steps>
+##### Switch to root user and configure system
+
+   ```bash
+   # Switch to root user
+   sudo -s
+   
+   # Increase file descriptor limit for eBPF operations
+   ulimit -n 32768
+   ```
+
+##### Clean previous data and start the service
+
+   ```bash
+   # Clean database files from previous runs (if any)
+   rm -rf *.db *.db-*
+   
+   # Activate virtual environment
+   source .venv/bin/activate
+   
+   # Start the analyzer service
+   python monitor.py
+   ```
+
+##### Alternative: Use startup script (if available)
+
+   ```bash
+   # Make script executable (if needed)
+   chmod +x start.sh
+   
+   # Run startup script with sudo
+   sudo ./start.sh
+   ```
+</Steps>
+### Service Configuration
+
+The Analyzer module will start an HTTP service with the following default configuration:
+
+- **Host**: `localhost` (127.0.0.1)
+- **Port**: `5000`
+- **Protocol**: HTTP
+- **Endpoint**: `http://localhost:5000`
+
+### Verification
+
+To verify the service is running correctly:
+
+```bash
+# Check if the service is listening
+sudo netstat -tlnp | grep :5000
+```
+
+## 🔌 API Endpoints
+
+### `/api/NumLatencyFrequency`
+
+**Purpose**: Statistical analysis of packet flows for specified five-tuples across network layers
+
+**Functionality**:
+- Analyzes packet flow patterns at data link, network, and transport layers
+- Calculates packet loss rates across different layers
+- Measures cross-layer latency and interaction frequencies
+- Provides comprehensive flow statistics
+
+
+## 🛠️ Troubleshooting
+
+**Common Issues:**
+
+1. **Permission denied**: Ensure you're running with root privileges
+2. **eBPF not supported**: Verify kernel version and eBPF compilation
+3. **Port already in use**: Check if another service is using port 5000
+4. **Missing dependencies**: Ensure all BCC components are properly installed
+
+**Debug Commands:**
+
+```bash
+# Check eBPF capabilities
+sudo /usr/share/bcc/tools/capable
+
+# Verify BCC installation
+python3 -c "import bcc; print('BCC installed successfully')"
+
+# Monitor system logs
+sudo journalctl -f -u analyzer
+
+# Check network interfaces
+ip link show
+```
+

@@ -1,0 +1,166 @@
+# Tracer
+
+import { Steps } from 'nextra/components'
+
+Track connection/packet interactions through the protocol stack and generate detailed visual path maps for comprehensive network analysis. **Real-time visibility**、**Traffic Monitoring** and **Fine-grained Tracing**
+
+## Overview
+
+The Tracer module provides real-time network traffic monitoring and fine-grained tracing capabilities using eBPF technology. It captures and analyzes network packet flows at the kernel level, offering detailed insights into protocol stack interactions and connection patterns.
+
+## 📦 Dependencies
+
+This module depends on [BCC (BPF Compiler Collection)](https://github.com/iovisor/bcc) for eBPF-based kernel-level data collection.
+
+### System Requirements
+
+- **Operating System**: Linux with kernel version ≥ 6.8 (for eBPF support)
+- **Privileges**: Root/administrator access required
+- **Python**: Python 3.7 or higher
+
+### Installation Steps
+<Steps>
+##### Install BCC dependencies
+
+   Follow the official installation guide: [INSTALL.md](https://github.com/iovisor/bcc/blob/master/INSTALL.md)
+
+   For common distributions:
+
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+   
+   # CentOS/RHEL
+   sudo yum install bcc-tools kernel-devel-$(uname -r)
+   
+   # Fedora
+   sudo dnf install bcc-tools kernel-devel-$(uname -r)
+   ```
+
+##### Set up Python environment
+
+   ```bash
+   # Create virtual environment
+   python3 -m venv .venv
+   
+   # Activate virtual environment
+   source .venv/bin/activate
+   
+   # Install Python dependencies
+   pip install -r requirements.txt
+   ```
+</Steps>
+
+## 🚀 Running the Module
+
+### Prerequisites
+
+- Ensure you have root privileges
+- Verify eBPF support: `sudo dmesg | grep -i bpf`
+- Check kernel version: `uname -r` (should be ≥ 6.8)
+
+### Startup Process
+<Steps>
+##### Switch to root user and configure system limits
+
+   ```bash
+   # Switch to root user
+   sudo -s
+   
+   # Increase file descriptor limit for eBPF operations
+   ulimit -n 32768
+   ```
+
+##### Clean previous data and start the service
+
+   ```bash
+   # Clean database files from previous runs
+   rm -rf *.db *.db-*
+   
+   # Activate virtual environment
+   source .venv/bin/activate
+   
+   # Start the monitoring service
+   python flaskServerMain.py
+   ```
+
+##### Alternative: Use the startup script
+
+   ```bash
+   # Make script executable (if needed)
+   chmod +x start.sh
+
+   # Run startup script with sudo
+   sudo ./start.sh
+   ```
+</Steps>
+
+### Service Configuration
+
+The Tracer module will start an HTTP service with the following default configuration:
+
+- **Host**: `localhost` (127.0.0.1)
+- **Port**: `19999`
+- **Protocol**: HTTP
+- **Endpoint**: `http://localhost:19999`
+
+### Verification
+
+To verify the service is running correctly:
+
+```bash
+# Check if the service is listening
+sudo netstat -tlnp | grep :19999
+
+# Test basic connectivity
+curl http://localhost:19999/health
+```
+
+## 🔧 Configuration
+
+The module can be configured through environment variables or configuration files:
+
+- **PORT**: Change the default port (default: 19999)
+- **HOST**: Change the bind address (default: 127.0.0.1)
+- **LOG_LEVEL**: Set logging verbosity (default: INFO)
+
+## 📊 Features
+
+- **Real-time packet capture**: Monitor network traffic as it flows through the system
+- **Protocol stack tracing**: Track packets through different network layers
+- **Connection mapping**: Visualize network connection patterns and flows
+- **Performance metrics**: Collect latency, throughput, and error statistics
+- **Fine-grained analysis**: Detailed packet-level inspection and analysis
+
+## 🛠️ Troubleshooting
+
+**Common Issues:**
+
+1. **Permission denied**: Ensure you're running with root privileges
+2. **eBPF not supported**: Verify kernel version and eBPF compilation
+3. **Port already in use**: Check if another service is using port 19999
+4. **Missing dependencies**: Ensure all BCC components are properly installed
+
+**Debug Commands:**
+
+```bash
+# Check eBPF capabilities
+sudo /usr/share/bcc/tools/capable
+
+# Verify BCC installation
+python3 -c "import bcc; print('BCC installed successfully')"
+
+# Check system resources
+sudo dmesg | tail -20
+```
+
+## 📝 API Documentation
+
+Once running, the Tracer module exposes REST API endpoints for:
+
+- `/api/traces` - Retrieve tracing data
+- `/api/connections` - Get connection information  
+- `/api/metrics` - Access performance metrics
+- `/health` - Service health check
+
+Detailed API documentation is available at `http://localhost:19999/docs` when the service is running.

@@ -1,0 +1,233 @@
+# Locator
+
+import { Callout, Steps } from 'nextra/components'
+
+A Flask-based network path analysis service that integrates real-time `traceroute` routing tracing, geographical and ASN queries, historical cache records, anomaly analysis, and Spamhaus malicious IP risk assessment capabilities.
+
+<Callout type="info" emoji="🚀">
+Locator provides comprehensive network path analysis with real-time monitoring, historical comparison, and security risk assessment in one unified platform.
+</Callout>
+
+## Key Features
+
+Locator offers a complete suite of network analysis tools designed for network administrators, security professionals, and developers:
+
+### Real-time Network Tracing
+- **Live Traceroute Analysis**: Execute real-time `traceroute` path tracking with streaming responses for each hop
+- **Hop-by-hop Monitoring**: Get detailed information about every network node in your path
+- **Performance Metrics**: Monitor latency, jitter, packet loss, and estimated bandwidth for each hop
+
+### Geographical Intelligence
+- **MaxMind GeoLite2 Integration**: Leverage city-level and ASN information for comprehensive geographical analysis
+- **ISP Identification**: Automatically identify Internet Service Providers for each network hop
+- **Global Network Mapping**: Visualize your network path across different geographical regions
+
+### Historical Analysis & Anomaly Detection
+- **Path History Comparison**: Compare current routes against historical records to detect path deviations
+- **Performance Baseline**: Identify high-latency issues and performance degradation over time
+- **Change Detection**: Automatically flag when network paths deviate from normal patterns
+
+### Security Risk Assessment
+- **Spamhaus Integration**: Real-time checking against Spamhaus DROP/EDROP blacklists
+- **Risk Scoring**: Automated risk assessment with numerical scoring for each traced path
+- **Threat Intelligence**: Continuous updates of malicious IP databases for enhanced security
+
+## Project Architecture
+
+```
+├── backend.py                  # Flask backend main application
+├── update_threat_intel.py      # Malicious IP update script (from Spamhaus)
+├── risky_ips.json              # Auto-generated risky IP list (JSON format)
+├── GeoLite2-City.mmdb          # City-level geographical IP database
+├── GeoLite2-ASN.mmdb           # ASN database
+├── history/                    # Cached historical traceroute paths
+```
+
+## Quick Start Guide
+
+### Prerequisites
+
+Before setting up Locator, ensure you have Python 3.7+ installed on your system.
+<Steps>
+#### Environment Setup
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+<Callout type="warning" emoji="⚠️">
+Make sure to activate your virtual environment before installing dependencies to avoid conflicts with system packages.
+</Callout>
+
+#### MaxMind GeoIP Database Setup
+
+Locator requires MaxMind's GeoLite2 databases for geographical analysis:
+
+1. **Register for MaxMind Account**: Visit [MaxMind's website](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) and create a free account
+2. **Download Required Databases**:
+   - [GeoLite2-City.mmdb](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data)
+   - [GeoLite2-ASN.mmdb](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data)
+3. **Place in Root Directory**: Move both `.mmdb` files to your project root directory
+
+#### Threat Intelligence Configuration
+
+  1. Risk IP Data Sources
+
+  Locator uses the `update_threat_intel.py` script to automatically fetch threat intelligence from:
+
+  - **Spamhaus DROP List**: [Spamhaus DROP](https://www.spamhaus.org/drop/) - Known malicious networks
+  - **Spamhaus EDROP List**: [Spamhaus EDROP](https://www.spamhaus.org/drop/edrop/) - Extended DROP list
+
+  2. Risk Database Format
+
+  The `risky_ips.json` file maintains the following structure:
+
+  ```json
+  {
+    "192.0.2.0/24": "Spamhaus DROP listed",
+    "203.0.113.0/25": "Known malware distributor"
+  }
+  ```
+
+  During analysis, each hop IP is checked against these network ranges for risk assessment.
+
+  3. Update Threat Intelligence
+
+  Run the following command to fetch and update the malicious IP database:
+
+  ```bash
+  python update_threat_intel.py
+  ```
+
+  <Callout type="info" emoji="🔄">
+  Consider setting up a cron job to automatically update threat intelligence data daily for the most current security information.
+  </Callout>
+
+#### Launch Backend Service
+
+```bash
+# Activate virtual environment (if not already active)
+source .venv/bin/activate
+
+# Start the monitoring service
+python backend.py
+```
+
+The service will start listening on port `8000` by default.
+</Steps>
+
+## API Reference
+
+Locator provides a RESTful API with three main endpoints for comprehensive network analysis.
+
+### Traceroute Analysis
+
+**Endpoint**: `GET /api/trace`
+
+**Parameters**:
+- `target` (required): Target domain name or IP address
+- `cache` (optional): Use historical cache (default: `true`)
+
+**Example Request**:
+```bash
+curl "http://localhost:8000/api/trace?target=google.com&cache=true"
+```
+
+**Response Format** (JSON Stream - one object per hop):
+```json
+{
+    "ip": "106.187.16.93",
+    "latency": 30.998,
+    "jitter": 3.1,
+    "packet_loss": "0%",
+    "bandwidth_mbps": 3.13,
+    "location": "Tokyo, Japan",
+    "asn": 2516,
+    "isp": "KDDI CORPORATION"
+}
+```
+
+### Historical Data Query
+
+**Endpoint**: `GET /api/history`
+
+**Parameters**:
+- `target` (optional): Specific target domain/IP (omit to get all history)
+
+**Example Request**:
+```bash
+curl "http://localhost:8000/api/history?target=youtube.com"
+```
+
+**Response Format**:
+```json
+{
+  "www.youtube.com": [
+    {
+      "result": [
+        {
+          "asn": "Unknown",
+          "bandwidth_mbps": "None",
+          "ip": "*",
+          "isp": "Unknown",
+          "jitter": "None",
+          "latency": null,
+          "location": "Unknown",
+          "packet_loss": "100%"
+        },
+        {
+          "asn": "AS15169",
+          "bandwidth_mbps": 1.68,
+          "ip": "kix06s11-in-f14.1e100.net",
+          "isp": "Google LLC",
+          "jitter": 5.86,
+          "latency": 58.592,
+          "location": "Tokyo, Japan",
+          "packet_loss": "0%"
+        }
+      ],
+      "timestamp": "20250505"
+    }
+  ]
+}
+```
+
+### Risk Analysis & Anomaly Detection
+
+**Endpoint**: `GET /api/analyze`
+
+**Parameters**:
+- `target` (required): Target domain name or IP address
+- `cache` (optional): Use historical cache (default: `true`)
+
+**Example Request**:
+```bash
+curl "http://localhost:8000/api/analyze?target=suspicious-site.com&cache=false"
+```
+
+**Response Format**:
+```json
+{
+  "anomalies": [
+    { 
+      "type": "PathDeviation", 
+      "detail": "New IP 203.0.113.1 detected at hop 4" 
+    },
+    {
+      "type": "HighLatency",
+      "detail": "Latency spike detected: 150ms vs 30ms average"
+    }
+  ],
+  "alerts": [
+    "IP 203.0.113.1 flagged as malicious: listed on Spamhaus DROP"
+  ],
+  "riskScore": 70
+}
+```
