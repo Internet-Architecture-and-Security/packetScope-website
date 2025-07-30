@@ -33,8 +33,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           banner={banner}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
+          // editLink={"https://github.com/Internet-Architecture-and-Security/packetScope-website/tree/main"}
+          docsRepositoryBase="https://github.com/Internet-Architecture-and-Security/packetScope-website/tree/main"
           footer={footer}
+          toc={{
+            backToTop: true,
+          }}
           // ... Your additional layout options
         >
           {children}

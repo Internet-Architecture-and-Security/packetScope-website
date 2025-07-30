@@ -7,7 +7,7 @@ const isGithubPages = process.env.GITHUB_ACTIONS === 'true'
 const withNextra = nextra({
   // ... Add Nextra-specific options here
   contentDirBasePath: '/docs',
-  latex: true
+  latex: true,
 })
  
 // Export the final Next.js config with Nextra included
