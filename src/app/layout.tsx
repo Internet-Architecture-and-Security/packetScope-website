@@ -5,12 +5,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // window.BASE_PATH = process.env.BASE_PATH;
   return (
     <html lang="en">
       <head>
         <title>PacketScope</title>
         <meta name="description" content="PacketScope: Smart Armor for Server-Side Defense" />
-        <link rel="icon" href="/favicon.svg" sizes="any" />
+        {
+          process.env.BASE_PATH ? <link rel="icon" href={`${process.env.BASE_PATH}/favicon.svg`} sizes="any" /> : <link rel="icon" href={`/favicon.svg`} sizes="any" />
+        }
       </head>
       <body>{children}</body>
     </html>

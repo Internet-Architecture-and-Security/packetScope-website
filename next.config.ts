@@ -26,8 +26,8 @@ export default withNextra({
   // 生产环境：使用相对路径以支持 GitHub Pages 子路径部署
   // ...(isProduction && {
   // 明确指定 GitHub Pages 的子路径
-  basePath: '/packetScope-website',
-  assetPrefix: '/packetScope-website/',
+  basePath: process.env.BASE_PATH,
+  assetPrefix: process.env.ASSET_PREFIX,
   // }),
   
   // 可选：如果需要在特定情况下使用 basePath
