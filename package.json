@@ -10,6 +10,7 @@
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind"
   },
   "dependencies": {
+    "@next/third-parties": "^15.4.5",
     "clsx": "^2.1.1",
     "lucide-react": "^0.526.0",
     "motion": "^12.23.10",
