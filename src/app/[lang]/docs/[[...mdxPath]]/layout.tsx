@@ -1,14 +1,14 @@
-import { Footer, Layout, Navbar } from 'nextra-theme-docs'
-import { Banner, Head, Image } from 'nextra/components'
+import { Footer, Layout, Navbar, LocaleSwitch,LastUpdated } from 'nextra-theme-docs'
+import { Banner, Head, Image, Search } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import Logo from "root/public/vercel.svg"
+import { getDictionary, getDirection } from '../../../_dictionaries/get-dictionary'
  
 export const metadata = {
   // Define your metadata here
   // For more information on metadata API, see: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
 }
- 
-const banner = <Banner storageKey="some-key">PacketScope 1.0 is released 🎉</Banner>
+
 const navbar = (
 <Navbar
   logo={
@@ -26,19 +26,46 @@ const navbar = (
 )
 const footer = <Footer>MIT {new Date().getFullYear()} © PacketScope.</Footer>
  
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: { lang: string }
+}) {
+  const paramsObj = await params;
+  const pageMap = await getPageMap(`/${paramsObj.lang}`)
+  const dictionary = await getDictionary(paramsObj.lang)
+  // console.log(pageMap)
+  const doc = pageMap[2].children[0];
+  doc.title = paramsObj.lang === 'en' ? doc.title : '文档';
+  const banner = <Banner storageKey="some-key">{paramsObj.lang === 'en' ? "PacketScope 1.0 is released" : "PacketScope 1.0 正式发布"} 🎉</Banner>
   return (
    
         <Layout
           banner={banner}
           navbar={navbar}
-          pageMap={await getPageMap()}
+          pageMap={[...pageMap.slice(0,2), doc]}
+          feedback={{content: dictionary.feedback}}
           // editLink={"https://github.com/Internet-Architecture-and-Security/packetScope-website/tree/main"}
           docsRepositoryBase="https://github.com/Internet-Architecture-and-Security/packetScope-website/tree/main"
           footer={footer}
+          search={<Search {...dictionary.search}/>}
           toc={{
-            backToTop: true,
+            backToTop: dictionary.backToTop,
+            title: dictionary.tocTitle,
           }}
+          themeSwitch={{
+            dark: dictionary.dark,
+            light: dictionary.light,
+            system: dictionary.system
+          }}
+          editLink={dictionary.editPage}
+          lastUpdated={<LastUpdated>{dictionary.lastUpdated}</LastUpdated>}
+          i18n={[
+            { locale: 'en', name: 'English' },
+            { locale: 'zh', name: '中文' },
+          ]}
           // ... Your additional layout options
         >
           {children}

@@ -1,14 +1,16 @@
 import './globals.css';
 import { GoogleAnalytics } from '@next/third-parties/google';
 
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   // window.BASE_PATH = process.env.BASE_PATH;
+
   return (
-    <html lang="en">
+    <html>
       <head>
         <title>PacketScope</title>
         <meta name="description" content="PacketScope: Smart Armor for Server-Side Defense" />

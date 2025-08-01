@@ -1,0 +1,233 @@
+# Locator（定位器）
+
+import { Callout, Steps } from 'nextra/components'
+
+基于 Flask 的网络路径分析服务，集成了实时 `traceroute` 路由追踪、地理位置和 ASN 查询、历史缓存记录、异常分析以及 Spamhaus 恶意 IP 风险评估功能。
+
+<Callout type="info" emoji="🚀">
+Locator 在一个统一平台中提供了全面的网络路径分析，包括实时监控、历史比较和安全风险评估。
+</Callout>
+
+## 主要特性
+
+Locator 为网络管理员、安全专家和开发人员提供完整的网络分析工具套件：
+
+### 实时网络追踪
+- **实时 Traceroute 分析**：执行实时 `traceroute` 路径追踪，为每个跳点提供流式响应
+- **逐跳监控**：获取网络路径中每个节点的详细信息
+- **性能指标**：监控每个跳点的延迟、抖动、丢包率和估计带宽
+
+### 地理位置智能
+- **MaxMind GeoLite2 集成**：利用城市级和 ASN 信息进行全面的地理位置分析
+- **ISP 识别**：自动识别每个网络跳点的互联网服务提供商
+- **全球网络映射**：可视化您的网络路径跨越不同地理区域
+
+### 历史分析和异常检测
+- **路径历史比较**：将当前路由与历史记录进行比较，检测路径偏差
+- **性能基线**：识别高延迟问题和随时间的性能下降
+- **变化检测**：当网络路径偏离正常模式时自动标记
+
+### 安全风险评估
+- **Spamhaus 集成**：针对 Spamhaus DROP/EDROP 黑名单进行实时检查
+- **风险评分**：为每个追踪路径提供数值评分的自动风险评估
+- **威胁情报**：持续更新恶意 IP 数据库以增强安全性
+
+## 项目架构
+
+```
+├── backend.py                  # Flask 后端主应用程序
+├── update_threat_intel.py      # 恶意 IP 更新脚本（来自 Spamhaus）
+├── risky_ips.json              # 自动生成的风险 IP 列表（JSON 格式）
+├── GeoLite2-City.mmdb          # 城市级地理位置 IP 数据库
+├── GeoLite2-ASN.mmdb           # ASN 数据库
+├── history/                    # 缓存的历史 traceroute 路径
+```
+
+## 快速开始指南
+
+### 前置条件
+
+在设置 Locator 之前，请确保您的系统已安装 Python 3.7+。
+<Steps>
+#### 环境设置
+
+```bash
+# 创建虚拟环境
+python3 -m venv .venv
+
+# 激活虚拟环境
+source .venv/bin/activate  # Windows 上：.venv\Scripts\activate
+
+# 安装 Python 依赖项
+pip install -r requirements.txt
+```
+
+<Callout type="warning" emoji="⚠️">
+确保在安装依赖项之前激活虚拟环境，以避免与系统包冲突。
+</Callout>
+
+#### MaxMind GeoIP 数据库设置
+
+Locator 需要 MaxMind 的 GeoLite2 数据库进行地理位置分析：
+
+1. **注册 MaxMind 账户**：访问 [MaxMind 网站](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) 并创建免费账户
+2. **下载所需数据库**：
+   - [GeoLite2-City.mmdb](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data)
+   - [GeoLite2-ASN.mmdb](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data)
+3. **放置在根目录**：将两个 `.mmdb` 文件移动到项目根目录
+
+#### 威胁情报配置
+
+  1. 风险 IP 数据源
+
+  Locator 使用 `update_threat_intel.py` 脚本自动从以下来源获取威胁情报：
+
+  - **Spamhaus DROP 列表**：[Spamhaus DROP](https://www.spamhaus.org/drop/) - 已知恶意网络
+  - **Spamhaus EDROP 列表**：[Spamhaus EDROP](https://www.spamhaus.org/drop/edrop/) - 扩展 DROP 列表
+
+  2. 风险数据库格式
+
+  `risky_ips.json` 文件维护以下结构：
+
+  ```json
+  {
+    "192.0.2.0/24": "Spamhaus DROP 列表中",
+    "203.0.113.0/25": "已知恶意软件分发者"
+  }
+  ```
+
+  在分析过程中，每个跳点 IP 都会与这些网络范围进行风险评估检查。
+
+  3. 更新威胁情报
+
+  运行以下命令获取和更新恶意 IP 数据库：
+
+  ```bash
+  python update_threat_intel.py
+  ```
+
+  <Callout type="info" emoji="🔄">
+  考虑设置 cron 作业来每天自动更新威胁情报数据，以获取最新的安全信息。
+  </Callout>
+
+#### 启动后端服务
+
+```bash
+# 激活虚拟环境（如果尚未激活）
+source .venv/bin/activate
+
+# 启动监控服务
+python backend.py
+```
+
+服务默认将在端口 `8000` 上开始监听。
+</Steps>
+
+## API 参考
+
+Locator 提供了一个 RESTful API，包含三个主要端点用于全面的网络分析。
+
+### Traceroute 分析
+
+**端点**：`GET /api/trace`
+
+**参数**：
+- `target`（必需）：目标域名或 IP 地址
+- `cache`（可选）：使用历史缓存（默认：`true`）
+
+**示例请求**：
+```bash
+curl "http://localhost:8000/api/trace?target=google.com&cache=true"
+```
+
+**响应格式**（JSON 流 - 每个跳点一个对象）：
+```json
+{
+    "ip": "106.187.16.93",
+    "latency": 30.998,
+    "jitter": 3.1,
+    "packet_loss": "0%",
+    "bandwidth_mbps": 3.13,
+    "location": "东京, 日本",
+    "asn": 2516,
+    "isp": "KDDI CORPORATION"
+}
+```
+
+### 历史数据查询
+
+**端点**：`GET /api/history`
+
+**参数**：
+- `target`（可选）：特定目标域名/IP（省略以获取所有历史记录）
+
+**示例请求**：
+```bash
+curl "http://localhost:8000/api/history?target=youtube.com"
+```
+
+**响应格式**：
+```json
+{
+  "www.youtube.com": [
+    {
+      "result": [
+        {
+          "asn": "未知",
+          "bandwidth_mbps": "无",
+          "ip": "*",
+          "isp": "未知",
+          "jitter": "无",
+          "latency": null,
+          "location": "未知",
+          "packet_loss": "100%"
+        },
+        {
+          "asn": "AS15169",
+          "bandwidth_mbps": 1.68,
+          "ip": "kix06s11-in-f14.1e100.net",
+          "isp": "Google LLC",
+          "jitter": 5.86,
+          "latency": 58.592,
+          "location": "东京, 日本",
+          "packet_loss": "0%"
+        }
+      ],
+      "timestamp": "20250505"
+    }
+  ]
+}
+```
+
+### 风险分析和异常检测
+
+**端点**：`GET /api/analyze`
+
+**参数**：
+- `target`（必需）：目标域名或 IP 地址
+- `cache`（可选）：使用历史缓存（默认：`true`）
+
+**示例请求**：
+```bash
+curl "http://localhost:8000/api/analyze?target=suspicious-site.com&cache=false"
+```
+
+**响应格式**：
+```json
+{
+  "anomalies": [
+    { 
+      "type": "路径偏差", 
+      "detail": "在跳点 4 检测到新 IP 203.0.113.1" 
+    },
+    {
+      "type": "高延迟",
+      "detail": "检测到延迟峰值：150ms vs 30ms 平均值"
+    }
+  ],
+  "alerts": [
+    "IP 203.0.113.1 被标记为恶意：列在 Spamhaus DROP 中"
+  ],
+  "riskScore": 70
+}
+```
