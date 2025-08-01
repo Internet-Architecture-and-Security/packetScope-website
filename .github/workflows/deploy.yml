@@ -62,7 +62,7 @@ jobs:
       - name: Build with Next.js
         run: |
           pnpm run build
-          pnpm run postbuild
+          pnpm run pagefind
         env:
           PAGES_BASE_PATH: ${{ steps.setup_pages.outputs.base_path }}
       
