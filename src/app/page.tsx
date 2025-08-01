@@ -250,7 +250,7 @@ export default function Home() {
             A Smart Armor for Server-Side Defense
           </p>
 
-          <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-5xl mx-auto leading-relaxed">
+          <div className="text-lg md:text-xl text-gray-400 mb-12 max-w-5xl mx-auto leading-relaxed">
             A general-purpose     <PointerHighlight
               rectangleClassName="bg-blue-100/10 dark:bg-blue-900 border-blue-300 dark:border-blue-700 leading-loose"
               pointerClassName="text-blue-500 h-3 w-3"
@@ -260,7 +260,7 @@ export default function Home() {
             </PointerHighlight> based on eBPF.
             Integrates performance optimization, anomaly diagnosis, and security defense with
             fine-grained tracing and intelligent analysis capabilities.
-          </p>
+          </div>
 
           {/* Enhanced Stats */}
           {/* <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mb-12">

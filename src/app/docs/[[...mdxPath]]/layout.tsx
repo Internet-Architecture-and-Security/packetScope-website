@@ -1,7 +1,6 @@
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head, Image } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
-import Logo from "root/public/vercel.svg"
  
 export const metadata = {
   // Define your metadata here
