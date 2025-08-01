@@ -39,7 +39,13 @@ export default function Home() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [stats, setStats] = useState({ stars: 0, users: 0, packets: 0 });
-
+  function getLangFromNavigator(): string {
+    const supportedLocales = ['en', 'zh'];
+    if (typeof navigator === 'undefined') return 'en'
+    const lang = navigator.language.split('-')[0]
+    return supportedLocales.includes(lang) ? lang : 'en'
+  }
+  
   useEffect(() => {
     setIsVisible(true);
 
@@ -283,7 +289,7 @@ export default function Home() {
 
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href={"/docs/get-started"} className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
+            <Link href={`${getLangFromNavigator()}/docs/get-started`} className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <Play className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               Get Started
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
