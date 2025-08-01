@@ -1,0 +1,160 @@
+import { Steps } from 'nextra/components'
+
+# Analyzer（分析器）
+
+提供数据包移动的多维度统计，包括流量、延迟和跨层交互，用于全面的网络分析。**深度洞察**、**协议栈分析引擎**。
+
+## 概述
+
+Analyzer 模块通过 HTTP API 接口提供协议栈内数据包流的实时统计分析。它提供多维度洞察，包括数据包数量、延迟测量、跨层交互频率，以及不同网络层的丢包统计。
+
+## 主要特性
+
+- **多层分析**：覆盖数据链路层、网络层和传输层的统计
+- **实时监控**：实时数据包流分析和报告
+- **跨层指标**：层间延迟和交互频率跟踪
+- **丢包检测**：全面的丢包率监控
+- **五元组分析**：详细的基于流的统计
+- **HTTP API 接口**：用于数据访问和导出的 RESTful 端点
+
+## 📦 依赖项
+
+此模块依赖 [BCC (BPF 编译器集合)](https://github.com/iovisor/bcc) 进行基于 eBPF 的内核级数据收集。
+
+### 系统要求
+
+- **操作系统**：Linux，内核版本 ≥ 6.8（支持 eBPF）
+- **权限**：需要 root/管理员访问权限
+- **Python**：Python 3.7 或更高版本
+
+### 安装步骤
+<Steps>
+##### 安装 BCC 依赖项
+
+   按照官方安装指南：[INSTALL.md](https://github.com/iovisor/bcc/blob/master/INSTALL.md)
+
+   对于常见发行版：
+
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+   
+   # CentOS/RHEL
+   sudo yum install bcc-tools kernel-devel-$(uname -r)
+   
+   # Fedora
+   sudo dnf install bcc-tools kernel-devel-$(uname -r)
+   ```
+
+##### 设置 Python 环境
+
+   ```bash
+   # 创建虚拟环境
+   python3 -m venv .venv
+   
+   # 激活虚拟环境
+   source .venv/bin/activate
+   
+   # 安装 Python 依赖项
+   pip install -r requirements.txt
+   ```
+</Steps>
+
+## 🚀 运行模块
+
+### 前置条件
+
+- 确保您拥有 root 权限
+- 验证 eBPF 支持：`sudo dmesg | grep -i bpf`
+- 检查内核版本：`uname -r`（应该 ≥ 6.8）
+
+### 启动流程
+<Steps>
+##### 切换到 root 用户并配置系统
+
+   ```bash
+   # 切换到 root 用户
+   sudo -s
+   
+   # 为 eBPF 操作增加文件描述符限制
+   ulimit -n 32768
+   ```
+
+##### 清理之前的数据并启动服务
+
+   ```bash
+   # 清理之前运行的数据库文件（如果有）
+   rm -rf *.db *.db-*
+   
+   # 激活虚拟环境
+   source .venv/bin/activate
+   
+   # 启动分析器服务
+   python monitor.py
+   ```
+
+##### 备选方案：使用启动脚本（如果可用）
+
+   ```bash
+   # 使脚本可执行（如果需要）
+   chmod +x start.sh
+   
+   # 使用 sudo 运行启动脚本
+   sudo ./start.sh
+   ```
+</Steps>
+### 服务配置
+
+Analyzer 模块将启动一个 HTTP 服务，默认配置如下：
+
+- **主机**：`localhost` (127.0.0.1)
+- **端口**：`5000`
+- **协议**：HTTP
+- **端点**：`http://localhost:5000`
+
+### 验证
+
+要验证服务是否正常运行：
+
+```bash
+# 检查服务是否在监听
+sudo netstat -tlnp | grep :5000
+```
+
+## 🔌 API 端点
+
+### `/api/NumLatencyFrequency`
+
+**用途**：对指定五元组在网络层间的数据包流进行统计分析
+
+**功能**：
+- 在数据链路层、网络层和传输层分析数据包流模式
+- 计算不同层间的丢包率
+- 测量跨层延迟和交互频率
+- 提供全面的流统计
+
+
+## 🛠️ 故障排除
+
+**常见问题：**
+
+1. **权限被拒绝**：确保您以 root 权限运行
+2. **不支持 eBPF**：验证内核版本和 eBPF 编译
+3. **端口已被占用**：检查是否有其他服务正在使用端口 5000
+4. **缺少依赖项**：确保所有 BCC 组件都已正确安装
+
+**调试命令：**
+
+```bash
+# 检查 eBPF 能力
+sudo /usr/share/bcc/tools/capable
+
+# 验证 BCC 安装
+python3 -c "import bcc; print('BCC installed successfully')"
+
+# 监控系统日志
+sudo journalctl -f -u analyzer
+
+# 检查网络接口
+ip link show
+```

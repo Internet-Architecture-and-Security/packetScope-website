@@ -2,12 +2,14 @@ import './globals.css';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Head } from 'nextra/components'
 
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   // window.BASE_PATH = process.env.BASE_PATH;
+
   return (
     <html suppressHydrationWarning lang="en">
       <Head

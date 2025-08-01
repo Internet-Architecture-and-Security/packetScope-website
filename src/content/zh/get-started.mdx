@@ -1,0 +1,68 @@
+import { Steps } from 'nextra/components'
+
+# 开始使用
+
+## 启动服务端模块
+
+本项目包含多个用不同语言实现的服务端模块。请参照每个模块的 `README.md` 文件安装依赖并启动服务。
+
+```bash
+modules
+├── Analyzer  # 基于 Python 的协议栈分析模块
+├── Guarder   # 基于 Go 的安全策略模块
+├── Locator   # 基于 Python 的网络路径映射模块
+└── Tracer    # 基于 Python 的流量监控和细粒度追踪模块
+```
+
+## 启动前端服务
+
+<Steps>
+
+前端基于 [Node.js](https://nodejs.org/en) 构建。请确保已安装 Node.js（版本 ≥ 16）。
+
+### 安装依赖
+
+在项目根目录运行以下命令：
+
+```sh npm2yarn
+npm install
+```
+> [!NOTE]
+>
+> 中国大陆用户可设置 npm 镜像以加速安装：
+> ```bash
+> npm config set registry http://registry.npmmirror.com
+> ```
+>
+
+
+### 启动预览服务器
+
+```sh npm2yarn
+npm run preview
+```
+
+应用程序默认在本地端口 `4173` 运行。
+
+### 访问应用
+
+打开浏览器并访问：
+
+```
+http://localhost:4173/
+```
+> [!TIP]
+>
+> 要在开发模式下运行并启用热重载，请使用以下命令：
+
+```sh npm2yarn
+npm run dev
+```
+> [!TIP]
+>
+> 要构建生产版本，请使用以下命令：
+
+```sh npm2yarn
+npm run build
+```
+</Steps>

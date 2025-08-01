@@ -1,0 +1,167 @@
+---
+asIndexPage: true
+---
+
+# Tracer（追踪器）
+
+import { Steps } from 'nextra/components'
+
+跟踪协议栈中连接/数据包的交互，生成详细的可视化路径图，用于全面的网络分析。**实时可见性**、**流量监控**和**细粒度追踪**
+
+## 概述
+
+Tracer 模块使用 eBPF 技术提供实时网络流量监控和细粒度追踪功能。它在内核级别捕获和分析网络数据包流，提供对协议栈交互和连接模式的详细洞察。
+
+## 📦 依赖项
+
+此模块依赖 [BCC (BPF 编译器集合)](https://github.com/iovisor/bcc) 进行基于 eBPF 的内核级数据收集。
+
+### 系统要求
+
+- **操作系统**：Linux，内核版本 ≥ 6.8（支持 eBPF）
+- **权限**：需要 root/管理员访问权限
+- **Python**：Python 3.7 或更高版本
+
+### 安装步骤
+<Steps>
+##### 安装 BCC 依赖项
+
+   按照官方安装指南：[INSTALL.md](https://github.com/iovisor/bcc/blob/master/INSTALL.md)
+
+   对于常见发行版：
+
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+   
+   # CentOS/RHEL
+   sudo yum install bcc-tools kernel-devel-$(uname -r)
+   
+   # Fedora
+   sudo dnf install bcc-tools kernel-devel-$(uname -r)
+   ```
+
+##### 设置 Python 环境
+
+   ```bash
+   # 创建虚拟环境
+   python3 -m venv .venv
+   
+   # 激活虚拟环境
+   source .venv/bin/activate
+   
+   # 安装 Python 依赖项
+   pip install -r requirements.txt
+   ```
+</Steps>
+
+## 🚀 运行模块
+
+### 前置条件
+
+- 确保您拥有 root 权限
+- 验证 eBPF 支持：`sudo dmesg | grep -i bpf`
+- 检查内核版本：`uname -r`（应该 ≥ 6.8）
+
+### 启动流程
+<Steps>
+##### 切换到 root 用户并配置系统限制
+
+   ```bash
+   # 切换到 root 用户
+   sudo -s
+   
+   # 为 eBPF 操作增加文件描述符限制
+   ulimit -n 32768
+   ```
+
+##### 清理之前的数据并启动服务
+
+   ```bash
+   # 激活虚拟环境
+   source .venv/bin/activate
+   
+   # 启动监控服务
+   python flaskServerMain.py
+   ```
+
+##### 备选方案：使用启动脚本
+
+   ```bash
+   # 使脚本可执行（如果需要）
+   chmod +x start.sh
+
+   # 使用 sudo 运行启动脚本
+   sudo ./start.sh
+   ```
+</Steps>
+
+### 服务配置
+
+Tracer 模块将启动一个 HTTP 服务，默认配置如下：
+
+- **主机**：`localhost` (127.0.0.1)
+- **端口**：`19999`
+- **协议**：HTTP
+- **端点**：`http://localhost:19999`
+
+### 验证
+
+要验证服务是否正常运行：
+
+```bash
+# 检查服务是否在监听
+sudo netstat -tlnp | grep :19999
+
+# 测试基本连接
+curl http://localhost:19999/health
+```
+
+## 🔧 配置
+
+模块可以通过环境变量或配置文件进行配置：
+
+- **PORT**：更改默认端口（默认：19999）
+- **HOST**：更改绑定地址（默认：127.0.0.1）
+- **LOG_LEVEL**：设置日志详细程度（默认：INFO）
+
+## 📊 特性
+
+- **实时数据包捕获**：监控流经系统的网络流量
+- **协议栈追踪**：跟踪数据包在不同网络层的流动
+- **连接映射**：可视化网络连接模式和流向
+- **性能指标**：收集延迟、吞吐量和错误统计
+- **细粒度分析**：详细的数据包级检查和分析
+
+## 🛠️ 故障排除
+
+**常见问题：**
+
+1. **权限被拒绝**：确保您以 root 权限运行
+2. **不支持 eBPF**：验证内核版本和 eBPF 编译
+3. **端口已被占用**：检查是否有其他服务正在使用端口 19999
+4. **缺少依赖项**：确保所有 BCC 组件都已正确安装
+
+**调试命令：**
+
+```bash
+# 检查 eBPF 能力
+sudo /usr/share/bcc/tools/capable
+
+# 验证 BCC 安装
+python3 -c "import bcc; print('BCC installed successfully')"
+
+# 检查系统资源
+sudo dmesg | tail -20
+```
+
+## 📝 API 文档
+
+运行后，Tracer 模块会暴露 REST API 端点用于：
+
+- `/api/traces` - 检索追踪数据
+- `/api/connections` - 获取连接信息  
+- `/api/metrics` - 访问性能指标
+- `/health` - 服务健康检查
+
+详细的 API 文档在服务运行时可在 `http://localhost:19999/docs` 获取。

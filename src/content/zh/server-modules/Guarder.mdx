@@ -1,0 +1,734 @@
+# Guarder（守护者）
+
+基于 eBPF/XDP 技术的高性能网络连接跟踪工具，监控 TCP/UDP 连接和 ICMP 流量，具备智能 AI 驱动的过滤器生成能力。
+
+## 🚀 特性
+
+- **高性能**：使用 eBPF/XDP 技术进行零拷贝数据处理
+- **全面监控**：TCP/UDP 连接跟踪和 ICMP 流量分析
+- **智能过滤**：AI 驱动的过滤规则生成和管理
+- **实时统计**：详细的网络性能统计和分析
+- **HTTP API**：完整的 RESTful API 接口
+- **精确匹配**：基于 IP、端口、协议等多维度过滤
+
+## 🏗️ 架构
+
+```
+┌─────────────────────┐      ┌─────────────────────────────────┐
+│                     │      │                                 │
+│    网络数据包       │──────▶  eBPF/XDP 程序                 │
+│                     │      │  (conn_tracker.c)              │
+└─────────────────────┘      └───────────────┬─────────────────┘
+                                             │
+                                             │ BPF Maps
+                                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│                         用户空间程序                            │
+│                                                                 │
+│  ┌───────────────┐    ┌───────────────┐    ┌───────────────┐    │
+│  │   BPF 加载器  │    │  Map 读取器   │    │  API 服务器   │    │
+│  │  (main.go)    │    │  (main.go)    │    │  (api.go)     │    │
+│  └───────────────┘    └───────────────┘    └───────────────┘    │
+│                                                    │            │
+│                       ┌─────────────────────────────────────┐   │
+│                       │         AI 分析模块                │   │
+│                       │       (ai_filter.go)               │   │
+│                       └─────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                                                     │
+                                                     ▼
+                                           ┌───────────────────────┐
+                                           │   HTTP 客户端/AI      │
+                                           └───────────────────────┘
+```
+
+## 📁 项目结构
+
+```
+conn-tracker/
+├── bpf/                    # eBPF 内核程序
+│   └── conn_tracker.c      # 主要 XDP 程序
+├── cmd/conn-tracker/       # 用户空间应用程序
+│   ├── main.go            # 主程序入口
+│   ├── api.go             # HTTP API 服务器
+│   ├── ai_filter.go       # AI 过滤器生成
+│   ├── filter.go          # 过滤器管理
+│   └── common.go          # 通用工具
+├── pkg/                   # Go 包
+└── docs/                  # 文档
+```
+
+## 🔧 安装
+
+### 前置条件
+- Linux 内核 5.4+（支持 eBPF/XDP）
+- Go 1.19+
+- libbpf 开发库
+- clang 编译器
+- OpenAI API 密钥（可选，用于 AI 功能）
+
+### 构建
+```bash
+# 克隆仓库
+git clone <repository-url>
+cd conn-tracker
+
+# 构建项目
+make
+
+# 运行应用程序
+sudo ./conn-tracker -iface eth0 -interval 5 -api :8080
+```
+
+### 命令行选项
+- `-iface`：要监控的网络接口（必需）
+- `-interval`：控制台输出间隔秒数（默认：10）
+- `-api`：API 服务器监听地址（默认：:8080）
+
+## 📊 连接跟踪
+
+### 实时监控
+系统提供全面的网络连接跟踪，包含详细信息：
+
+- **TCP/UDP 连接**：源/目标 IP、端口、数据包计数、字节计数
+- **连接状态**：TCP 标志、序列号、确认号
+- **时间信息**：首次发现、最后发现时间戳
+- **性能指标**：重传、窗口大小、丢包
+
+### API 端点
+
+#### 获取连接
+```bash
+curl http://localhost:8080/api/connections
+```
+
+**响应示例：**
+```json
+[
+  {
+    "key": "192.168.1.100:12345 -> 8.8.8.8:53 (UDP)",
+    "info": "数据包: 1, 字节: 64, IP ID: 1234, 最后发现: 2023-05-01T12:34:56Z"
+  },
+  {
+    "key": "192.168.1.100:56789 -> 93.184.216.34:443 (TCP)",
+    "info": "数据包: 42, 字节: 8192, TCP 标志: 24, 序列号: 1234567890, 确认号: 987654321"
+  }
+]
+```
+
+#### 获取 ICMP 流量
+```bash
+curl http://localhost:8080/api/icmp
+```
+
+#### 获取性能统计
+```bash
+curl http://localhost:8080/api/stats
+```
+
+## 🛡️ 过滤器管理
+
+### 概述
+过滤器系统提供内核空间数据包过滤，支持跨不同协议的细粒度过滤：
+
+- **基础过滤**：IP 地址、端口、协议
+- **ICMP 过滤**：ICMP 类型、代码和错误消息检查
+- **TCP 过滤**：基于 TCP 标志的过滤
+- **UDP 过滤**：基于端口的过滤
+
+### 过滤器 API
+
+#### 获取所有过滤器
+```bash
+curl http://localhost:8080/api/filters
+```
+
+##### 内置安全过滤器示例
+
+**1. 阻止所有 ICMP Ping 请求：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 8,
+    "icmp_code": 0,
+    "action": "drop",
+    "enabled": false,
+    "comment": "阻止所有 ICMP ping 请求（回显请求）"
+  }'
+```
+
+**2. 阻止 ICMP 目标不可达和源抑制：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 3,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 ICMP 目标不可达消息"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 4,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 ICMP 源抑制消息"
+  }'
+```
+
+**8. 阻止包含 UDP 流量的 ICMP 错误消息：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 3,
+    "inner_protocol": "udp",
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止带有内部 UDP 数据包的 ICMP 目标不可达"
+  }'
+```
+
+**9. 高级 ICMP 过滤 - 阻止特定内部 UDP 端口：**
+```bash
+# 阻止包含 DNS 流量的 ICMP 错误（内部 UDP 端口 53）
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 3,
+    "inner_protocol": "udp",
+    "inner_dst_ip": "",
+    "comment": "阻止暴露 DNS 查询的 ICMP 错误"
+  }'
+
+# 阻止带有内部 UDP 的 ICMP 超时（traceroute 检测）
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 11,
+    "inner_protocol": "udp",
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 UDP traceroute 尝试（ICMP 超时）"
+  }'
+```
+
+**10. 阻止所有 ICMP 回显请求（全面 Ping 阻止）：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "protocol": "icmp",
+    "icmp_type": 8,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止所有 ICMP 回显请求（全面 ping 阻止）"
+  }'
+```
+
+**4. 阻止危险端口 - 远程访问：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 23,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 Telnet（不安全的远程访问）"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 135,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 RPC 端点映射器（Windows 漏洞）"
+  }'
+```
+
+**5. 阻止危险端口 - 文件共享：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 445,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 SMB/CIFS（勒索软件载体）"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 139,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 NetBIOS 会话服务"
+  }'
+```
+
+**6. 阻止危险端口 - 数据库服务：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 1433,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 MS SQL Server（外部访问）"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 3306,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 MySQL（外部访问）"
+  }'
+```
+
+**7. 阻止危险端口 - 远程桌面：**
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 3389,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 RDP（暴力破解目标）"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "tcp",
+    "protocol": "tcp",
+    "dst_port": 5900,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 VNC（不安全的远程访问）"
+  }'
+```
+
+#### 更新过滤器
+```bash
+curl -X PUT http://localhost:8080/api/filters/0 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 0,
+    "action": "drop",
+    "enabled": false,
+    "comment": "临时禁用"
+  }'
+```
+
+#### 删除过滤器
+```bash
+curl -X DELETE http://localhost:8080/api/filters/0
+```
+
+#### 启用/禁用过滤器
+```bash
+# 启用
+curl -X POST http://localhost:8080/api/filters/0/enable
+
+# 禁用
+curl -X POST http://localhost:8080/api/filters/0/disable
+```
+
+### 过滤规则类型
+
+#### 通配符值
+创建过滤规则时，您可以省略某些字段，系统会自动将它们设置为通配符值：
+- **IP 地址**：空或省略的字段设置为 `"any"`（匹配任何 IP）
+- **端口**：默认值 `0` 匹配任何端口
+- **协议**：如果未指定，根据 `rule_type` 自动设置
+- **ICMP 类型/代码**：在 BPF 程序中使用 `255` 进行通配符匹配
+
+#### 测试和调试过滤器
+要验证过滤器是否正常工作：
+
+1. **监控 BPF 跟踪输出**（显示详细的过滤器匹配）：
+```bash
+sudo cat /sys/kernel/debug/tracing/trace_pipe
+```
+
+2. **检查过滤器是否成功添加**：
+```bash
+curl http://localhost:8080/api/filters
+```
+
+3. **使用 ping 测试 ICMP 过滤器**：
+```bash
+# 添加 ICMP 过滤器
+curl -X POST http://localhost:8080/api/filters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule_type": "icmp",
+    "icmp_type": 8,
+    "icmp_code": 0,
+    "action": "drop",
+    "enabled": true,
+    "comment": "阻止 ICMP ping 请求"
+  }'
+
+# 使用 ping 测试（应该被阻止）
+ping -c 1 target_ip
+```
+
+#### 基础规则
+字段：`src_ip`, `dst_ip`, `src_port`, `dst_port`, `protocol`
+
+#### TCP 规则  
+附加字段：`tcp_flags`, `tcp_flags_mask`
+
+#### UDP 规则
+字段：`src_port`, `dst_port`
+
+#### ICMP 规则
+附加字段：`icmp_type`, `icmp_code`, `inner_src_ip`, `inner_dst_ip`, `inner_protocol`
+
+### TCP 标志参考
+
+| 标志 | 值 | 描述 |
+|------|-------|-------------|
+| FIN  | 1     | 连接终止 |
+| SYN  | 2     | 同步，建立连接 |
+| RST  | 4     | 重置连接 |
+| PSH  | 8     | 推送数据 |
+| ACK  | 16    | 确认 |
+| URG  | 32    | 紧急数据 |
+
+**常见组合：**
+- `SYN` (2)：连接请求
+- `SYN+ACK` (18)：连接响应  
+- `ACK` (16)：数据传输
+- `FIN+ACK` (17)：正常关闭
+- `RST` (4)：强制关闭
+
+## 🤖 AI 驱动的过滤器生成
+
+### 概述
+AI 智能过滤器生成功能利用大型语言模型（如 OpenAI GPT 系列）分析网络连接数据，自动生成适当的 eBPF 过滤规则。
+
+### 核心特性
+- **智能分析**：自动分析 TCP/UDP 连接、ICMP 流量和性能统计
+- **多种策略**：安全导向、性能导向和平衡模式
+- **自定义提示**：用户提供的自定义分析指令
+- **详细注释**：生成的规则包含详细解释和建议
+- **灵活配置**：支持自定义 OpenAI 端点和模型参数
+
+### AI 配置
+
+#### 获取当前配置
+```bash
+curl http://localhost:8080/api/ai/config
+```
+
+#### 更新 AI 配置
+```bash
+curl -X POST http://localhost:8080/api/ai/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "openai_endpoint": "https://api.openai.com/v1/chat/completions",
+    "api_key": "sk-your-openai-api-key",
+    "model": "gpt-4",
+    "temperature": 0.7,
+    "timeout": 120,
+    "debug": true
+  }'
+```
+
+### AI 过滤器生成
+
+#### 安全导向分析
+```bash
+curl -X POST http://localhost:8080/api/ai/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analyze_type": "security",
+    "include_tcp": true,
+    "include_icmp": true,
+    "include_stats": true
+  }'
+```
+
+#### 性能导向分析
+```bash
+curl -X POST http://localhost:8080/api/ai/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analyze_type": "performance",
+    "include_tcp": true,
+    "include_icmp": false,
+    "include_stats": true
+  }'
+```
+
+#### 自定义分析
+```bash
+curl -X POST http://localhost:8080/api/ai/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analyze_type": "custom",
+    "custom_prompt": "专注于 SSH 和 HTTP 服务安全，识别暴力破解攻击",
+    "include_tcp": true,
+    "include_icmp": true,
+    "include_stats": true
+  }'
+```
+
+#### 仅网络分析（不生成过滤器）
+```bash
+curl -X POST http://localhost:8080/api/ai/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "include_tcp": true,
+    "include_icmp": true,
+    "include_stats": true,
+    "custom_prompt": "分析流量模式中的异常"
+  }'
+```
+
+### 支持的端点
+
+#### OpenAI 兼容端点
+```bash
+# OpenAI 官方
+"https://api.openai.com/v1/chat/completions"
+
+# Azure OpenAI
+"https://your-resource.openai.azure.com/openai/deployments/your-deployment/chat/completions?api-version=2023-05-15"
+
+# DeepSeek AI
+"https://api.deepseek.com/v1/chat/completions"
+```
+
+#### 本地部署模型
+```bash
+# Ollama
+"http://localhost:11434/v1/chat/completions"
+
+# vLLM
+"http://localhost:8000/v1/chat/completions"
+
+# LocalAI
+"http://localhost:8080/v1/chat/completions"
+```
+
+### 响应格式
+
+#### 成功响应
+```json
+{
+  "success": true,
+  "analysis": "网络流量分析显示 SSH 服务存在潜在暴力破解攻击...",
+  "suggestions": [
+    "为 SSH 连接实施速率限制",
+    "阻止可疑 IP 地址",
+    "监控端口扫描活动"
+  ],
+  "filters": [
+    {
+      "rule_type": "tcp",
+      "protocol": "tcp",
+      "tcp_flags": 2,
+      "tcp_flags_mask": 2,
+      "action": "drop",
+      "enabled": true,
+      "comment": "阻止 TCP SYN 扫描攻击"
+    }
+  ],
+  "tokens_used": 250
+}
+```
+
+### 调试模式
+
+#### 启用调试模式
+```bash
+curl -X POST http://localhost:8080/api/ai/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "debug": true,
+    "timeout": 120
+  }'
+```
+
+启用调试模式时，详细信息将打印到服务器控制台：
+- 请求参数
+- 连接数据摘要  
+- 生成的系统提示
+- OpenAI API 请求/响应
+- HTTP 请求/响应详情
+- JSON 解析过程
+- 最终结果
+
+## 🎯 使用场景
+
+### 网络安全监控
+- 实时监控网络连接状态
+- 检测异常流量和潜在威胁
+- 自动生成安全防护规则
+
+### 性能优化
+- 分析网络瓶颈和性能问题
+- 优化网络配置和流量分发
+- 智能生成性能优化规则
+
+### 合规审计
+- 网络访问控制和审计
+- 安全标准合规性配置检查
+- 自动化合规报告生成
+
+### 事件响应
+- 快速响应网络安全事件
+- 自动生成应急防护规则
+- 威胁狩猎的流量模式分析
+
+## 🛠️ 高级配置
+
+### 环境变量
+```bash
+export OPENAI_API_KEY="your-api-key"
+export OPENAI_ENDPOINT="https://api.openai.com/v1/chat/completions"
+export AI_DEBUG="true"
+```
+
+### 自动化脚本示例
+```bash
+#!/bin/bash
+
+# 配置 AI 服务
+curl -X POST http://localhost:8080/api/ai/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "openai_endpoint": "'$OPENAI_ENDPOINT'",
+    "api_key": "'$OPENAI_API_KEY'",
+    "model": "gpt-4",
+    "temperature": 0.5,
+    "timeout": 120
+  }'
+
+# 生成安全过滤规则
+RESPONSE=$(curl -s -X POST http://localhost:8080/api/ai/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analyze_type": "security",
+    "include_tcp": true,
+    "include_icmp": true,
+    "include_stats": true
+  }')
+
+# 检查是否成功
+if echo "$RESPONSE" | jq -e '.success' > /dev/null; then
+  echo "AI 分析成功完成"
+  echo "$RESPONSE" | jq '.analysis'
+  
+  # 自动应用生成的规则（可选）
+  echo "$RESPONSE" | jq '.filters[]' | while IFS= read -r filter; do
+    curl -X POST http://localhost:8080/api/filters \
+      -H "Content-Type: application/json" \
+      -d "$filter"
+  done
+else
+  echo "AI 分析失败："
+  echo "$RESPONSE" | jq '.error'
+fi
+```
+
+## 🔍 故障排除
+
+### 常见问题
+
+#### 编译错误
+- 确保已安装 Linux 内核头文件
+- 验证 clang 和 libbpf 开发包
+- 检查 Go 版本（需要 1.19+）
+
+#### API 连接问题
+```bash
+# 检查服务是否运行
+curl http://localhost:8080/api/stats
+
+# 验证网络接口
+ip link show
+```
+
+#### AI 生成失败
+- 验证 API 密钥和端点配置
+- 检查到 AI 服务的网络连接
+- 启用调试模式获取详细错误信息
+- 增加超时时间以应对慢速 AI 响应
+
+#### 权限错误
+```bash
+# 使用 sudo 运行 eBPF 操作
+sudo ./conn-tracker -iface eth0
+```
+
+## 📋 技术规格
+
+- **内核要求**：Linux 5.4+
+- **内存使用**：典型情况下 < 50MB
+- **CPU 开销**：在现代系统上 < 1%
+- **网络协议**：IPv4、TCP、UDP、ICMP
+- **最大连接数**：支持 100 万+ 并发跟踪
+- **过滤规则**：支持 1000+ 规则
+
+## 🌟 致谢
+
+- Linux 内核社区的 eBPF/XDP 技术
+- OpenAI 提供的 AI 驱动分析能力
+- Go eBPF 库和工具
+
+## 📚 其他资源
+
+- [eBPF 文档](https://ebpf.io/)
+- [XDP 教程](https://github.com/xdp-project/xdp-tutorial)
+- [OpenAI API 文档](https://platform.openai.com/docs)
+
+---

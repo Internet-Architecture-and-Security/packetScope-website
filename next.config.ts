@@ -8,10 +8,15 @@ const withNextra = nextra({
   // ... Add Nextra-specific options here
   contentDirBasePath: '/docs',
   latex: true,
+  unstable_shouldAddLocaleToLinks: true,
 })
  
 // Export the final Next.js config with Nextra included
 export default withNextra({
+  i18n: {
+    locales: ['en', 'zh'],
+    defaultLocale: 'en'
+  },
   // ... Add regular Next.js options here
   typescript: {
     // 允许 build 时跳过 TS 错误
