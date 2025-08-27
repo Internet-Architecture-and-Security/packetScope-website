@@ -39,7 +39,7 @@ export default async function RootLayout({
   // console.log(pageMap)
   const doc = pageMap[2].children[0];
   doc.title = paramsObj.lang === 'en' ? doc.title : '文档';
-  const banner = <Banner storageKey="some-key">{paramsObj.lang === 'en' ? "PacketScope 1.0 is released" : "PacketScope 1.0 正式发布"} 🎉</Banner>
+  const banner = <Banner storageKey="some-key">{paramsObj.lang === 'en' ? "PacketScope 1.1 is released" : "PacketScope 1.1 正式发布"} 🎉</Banner>
   return (
    
         <Layout

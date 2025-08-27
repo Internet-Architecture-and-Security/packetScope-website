@@ -1,0 +1,109 @@
+
+## PacketScope之协议交互“透视镜”
+
+> 继续为大家介绍 PacketScope 项目的Tracer功能，即网络协议交互的“**透视镜**”。协议交互“透视镜”能够将底层协议栈中复杂的交互过程和信息、细粒度的直观呈现给用户，辅助用户理解网络分组在协议栈中经历的每一步处理及整个生命周期，同时洞察不同协议之间的调用链路与上下文依赖，及早发现潜在的性能故障点、异常行为和跨层风险。
+
+**一、协议交互：互联网通信的隐形脉络**
+
+在现代互联网架构中，TCP/IP协议栈是端到端（End-to-End）数据可靠通信的核心载体。在一次看似简单的数据传输过程中（比如用户通过手机端的浏览器访问远程web服务器上的某个网站），往往要发生复杂的协议交互过程，才能顺利完成数据的可靠传输。
+
+**（1）什么是网络协议交互？**
+
+![image.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/b8e9ec005479454ab401b3d3f0823018~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=MSkE6V3aNoIaP%2BPUoQWhevweSMw%3D)
+
+<p align="center">图1 端到端数据传输过程中的协议交互</p>
+
+我们可以用一个简化的例子来说明什么是协议交互。如图1所示，当用户在浏览器地址栏输入一个网站地址并回车后，背后会发生一连串复杂的协议交互：
+
+*   首先是域名解析（DNS over UDP/IP）。浏览器首先需要知道目标网站对应的IP地址，于是向本地DNS服务器发起一个基于UDP的DNS请求，随后通过IP层封装并传递。DNS服务器返回结果，客户端获得目标服务器的IP地址；
+
+*   然后是建立连接（TCP三次握手over IP）。有了目标IP后，客户端向服务器发起TCP连接。客户端先发送一个带SYN标志的TCP分组，服务器返回SYN-ACK，客户端再回ACK确认，连接正式建立；
+
+*   接着是数据传输（HTTP over TCP/IP）。浏览器通过已建立的TCP连接发送HTTP请求（如GET /index.html），服务器则将网页内容分片封装在TCP分组中返回。TCP保证数据可靠、有序地到达。
+
+*   ICMP、ARP、DHCP、Wi-Fi、5G、VPN、TLS等协议的幕后参与。在这一过程中，同时还有诸多其他的协议参与交互，完成错处处理、数据加密、秘钥分配、地址分配、数据帧封装等，最终协同实现HTTP消息从远端服务器顺利到达客户端。
+
+因此，网络协议交互是指在计算机网络中，不同层级或不同类型的通信协议在完成某一特定网络任务时，通过**消息交换、状态更新与语义依赖**所形成的协作过程。单一协议通常只定义自身的消息格式与处理规则，而一次完整的网络通信往往需要多个协议共同参与。**网络协议交互的本质**就是：各协议在分层架构下通过数据与控制信息的交换，形成一条跨层次、跨协议的因果链，从而共同实现端到端通信的目标。
+
+![image.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/82dafcbd730447239dade391d3ce312a~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=dtS6WEnNCpD3sUY7%2BkVdf9HjLVU%3D)
+
+<p align="center">图2 网络协议交互的透视分析</p>
+
+**（2）透视网络协议交互为什么重要？**
+
+上述例子表明，即使一个“点开网页”的小动作，其实背后是DNS、UDP、IP、TCP、HTTP、ICMP等诸多协议的复杂交互与协作，对协议交互的这一复杂过程进行全景透视与分析具有重要的意义。
+
+*   **避免“黑箱”效应** **：** 每一个分组的生成、传递与响应，都是不同协议之间的交互。对用户来说，这一切都是“黑箱操作”；而对网络管理员而言，如果只依赖传统抓包或日志，往往只能看到零散的分组，难以理解它们背后的因果关系、进而还原出**协议之间交互的完整因果链条**。透视交互能将“黑箱”过程显性化，帮助管理员和用户从全局上把握通信逻辑。
+
+*   **快速定位故障与性能瓶颈** **：** 当网络传输异常时，问题可能出在不同协议的交互上，例如：路径MTU发现依赖的ICMP消息缺失会导致TCP长时间重传；DNS解析延迟会拖慢整个HTTP请求。通过透视交互，可以精确定位是哪个协议、哪个环节出现异常，从而缩短排障时间。
+
+*   **识别潜在安全风险** **：** 越来越多的攻击利用协议交互中的“模糊和灰色地带”，例如伪造ICMP消息干扰TCP会话，或者通过跨协议的语义差异进行流量劫持。透视交互能帮助管理员发现这些异常路径与跨层耦合，及时阻断潜在威胁。
+
+*   **辅助** **网络** **优化与决策** **：** 在网络运维和系统优化中，理解协议交互可以为配置调整、策略部署提供数据支持。例如在CDN、云环境中，通过透视交互可识别不同路径的效率差异，从而指导更优的路由或缓存策略。
+
+**二、基于eBPF的协议交互全景可视化**
+
+PacketScope的Tracer功能利用eBPF技术，为用户提供了前所未有的协议交互全景可视化能力。eBPF允许在内核中安全、高效地插入探针，对网络协议栈中活跃的套接字和数据包进行实时监控，而无需修改操作系统内核或协议栈代码。通过这一机制，PacketScope能够捕获数据包在内核协议栈中的完整处理路径，记录每一步的处理动作、状态变更及上下文依赖关系，就像一面“透视镜”，能够将底层协议栈中每一次分组的流动、每一个协议的调用、每一条跨层依赖关系，清晰、细粒度地呈现出来。
+
+![image.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/0cec93a137d14d348051b7b8ee20bb70~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=Rsq8%2BxUsBYu%2BcRnGiZ%2FGPhy2WuY%3D)
+
+<p align="center">图3 基于eBPF的协议交互追踪与交互图绘制</p>
+
+*   **网络接口数据包捕获** **。** 模块首先在网络接口上挂载eBPF探针，以捕获进入和离开网卡的数据包信息。这一机制保证了对数据包从链路层到网络层的入/出流动进行精确监控，为后续跨层追踪提供基础数据。
+
+*   **关键内核函数插桩** **。** 系统性筛选内核中与网络处理高度相关的函数集，这些函数满足以下条件之一：函数名包含关键字段，如 "tcp", "udp", "icmp", "recv", "send", "xmit", "ip", "sk", "sock"；或者函数与核心数据结构 **sk\_buff** 的调用关联频繁。对筛选出的函数，记录每次函数调用与返回的**线程ID**及**时间戳**，为构建函数调用链打下基础。
+
+*   **数据包与函数调用事件关联** **。** 为精确关联数据包与离散函数调用事件，模块定义了一组“**起点函数**”，包括："icmp\_push\_reply", "rawv6\_sendmsg", "raw\_sendmsg", "udp\_sendmsg", "udpv6\_sendmsg", "tcp\_sendmsg", "ip\_rcv\_core", "ip6\_rcv\_core", "ipv6\_rcv", "ip\_rcv", "ip\_list\_rcv", "ipv6\_list\_rcv"。Tracer在起点函数调用与返回时，记录**网络四元组、线程ID及时间戳**，并追踪从起点函数调用到返回过程中所经过的所有函数。通过线程ID和调用连续性确认函数链的完整性，最终将**函数调用链信息与数据包信息绑定**，实现包级别的精细化函数调用分析。
+
+*   **跨层交互与性能量化** **。** Tracer进一步梳理数据包在协议栈中的完整收发路径，在链路层、网络层和传输层识别最能代表各层处理工作的**关键函数**作为插桩点。量化指标包括：**层流量**：数据包流经该层插桩点的次数，反映该层的处理工作量；**跨层交互频率**：数据包在各层关键函数之间交互的频率，衡量协议栈的跨层耦合程度；**跨层延迟**：数据包在各层关键函数之间流转的处理时间，反映协议栈处理效率及潜在性能瓶颈。\*\*\*\*
+
+通过上述设计，PacketScope的Tracer模块不仅实现了对协议交互的可视化和精确追踪，还提供了**性能与行为量化指标**，为网络故障诊断、性能优化以及安全风险分析提供了基础依据。
+
+**三** **、** **PacketScope及Tracer的安装及使用**
+
+PacketScope\_1.0 版本已在Linux 环境（内核 6.8）中完成了相关模块的测试部署，能够对服务器协议栈交互行为进行细粒度分析，识别和阻断交互式复杂网络攻击，显著降低安全事件的响应成本。
+结合图例，对协议交互分析过程中的关键步骤和功能简要说明如下：
+
+*   下图展示了点击主界面左上角“**开始监控**”按钮后，系统将开始读取内核中的套接字列表，从而获取当前系统内所有活跃的网络连接信息。这些连接将根据五元组（源IP地址、源端口、目的IP地址、目的端口和协议类型）以及当前的协议状态（例如TCP的ESTABLISHED、LISTEN等）进行分类和组织，并统一呈现在“总体套接字列表”中。
+
+![home.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/bd0e02fa373f4bdc8d46edf81188c46d~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=zykNz76SNU599cI1CUNMrcgyuBM%3D)
+![home\_light.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/2aad49ce48674714a4c6447adbe6bdb6~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=5KdtjIgwQF2aU%2FY%2BsdKQDYt0ung%3D)
+（当前版本已更新至 v1.1.0，新增夜间模式和国际化模式，并对整体视觉效果进行了优化）
+
+*   下图展示了选中单个Socket进行监控（这里我们选择正在使用TCP通信的流进行监控，ID为48），可以看到三个主要功能，分别为**包分析器**、**函数调用链监控器**和**协议栈监控器**。
+
+![home.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/bd0e02fa373f4bdc8d46edf81188c46d~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=zykNz76SNU599cI1CUNMrcgyuBM%3D)
+
+*   下图展示了包分析器提供了类似于 **tcpdump** 的功能，可以获取此socket上经过的数据包，并给出基本的数据包信息，例如：时间戳、网口号、包方向和包长度等。
+    ![6221755846072\_.pic.jpg](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/cff7872f921a4763b85b12c989d75221~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=XcEfjO5BaZsvzJVLKl8acSouA44%3D)
+
+*   下图展示了函数调用链监控器提供函数调用路径、展示数据包在内核处理过程中经过的各个函数及其调用关系。用户可通过逐级展开调用链，追踪数据包在内核中的完整处理流程（从下图可以看到，该TCP流进行收包时，会涉及到网络层的ip\_rcv\_core、ip\_local\_deliver等函数、涉及到传输层的tcp\_v4\_rcv、tcp\_filter等函数）。该功能有助于定位：网络性能瓶颈、网络故障和潜在的安全漏洞。
+    ![6231755846082\_.pic.jpg](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/18a46f2d03d54901a4951e16540442f9~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=I36%2BbWnK5miy8XZT86K48vsOMd0%3D)
+     
+
+*   函数调用链分析器还提供了函数调用路径的可视化视图，即函数粒度级的**网络协议交互图**，通过可视化工具，将图形化的函数调用链路完整展示在用户面前。用户可以通过颜色深浅直观发现路径中的性能瓶颈，**该函数执行耗时越多颜色越深，该函数调用次数越多连线越粗**，起到瓶颈及风险函数高效定位的作用，为代码性能优化及攻击风险识别提供帮助，例如在一些网络侧信道攻击中，攻击者可能会频繁探测目标服务器状态，导致某些协议函数被反复调用执行，产生异常。下面两张图展示了选定一个TCP流的协议交互图，上图为完整协议交互图，下图为按照时延过滤后、仅保留高延迟函数节点的部分协议交互图。
+
+![WX20250814-232748@2x.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/7a5cbbcbc01645299bfb70074743b12e~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=T6%2BNuh%2FlZmfmZGVqISCNeryNdT4%3D)
+
+![WX20250814-232725@2x.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/07af227e6b3b40438d23f7918afcf1a1~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=DiygtgYiEe7bcH2ClDzv7V%2FdYYo%3D)
+
+*   下图展示了协议栈监控器对跨层交互性能的实时监控，覆盖四个关键指标：分组数据流动数量、跨层延迟、跨层交互频率以及丢包率。此监控能力可辅助精准定位网络性能瓶颈，为优化协议栈资源分配提供依据。例如，跨层延迟指标有助于识别协议栈中的耗时瓶颈层、分组数据流动数量与丢包率指标有助于定位通信故障点。
+
+![WX20250814-231928@2x.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/7707279764d84d96ba98aa5ad0130de0~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=P4%2F%2F9xBchoU64sAILAJC%2FB%2BQzk8%3D)
+
+![WX20250814-231957@2x.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/55fa197c503f4b93b23685cfdfca27b7~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAgc2luZ3Nvbmc=:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjU0MTcyNjYxMzY1MDkzNSJ9&rk3s=f64ab15b&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1756888975&x-orig-sign=X8E4iggsH7PbXu4T77LP%2Fp%2BgeQI%3D)
+
+**四、** **未来** **展望**
+
+PacketScope项目逐渐打开了端侧协议栈复杂交互的“黑盒”，推动终端安全从外部防御隔离向内部认知安全演进。
+
+*   未来，PacketScope项目将继续扩展相关功能模块，比如实现应用级协议的分析追踪、构建跨主机协同分析能力实现管理域内多主机内核协议栈的分布式追踪、开放更为灵活的编程接口便于专业人员自定义函数观测点及监控参数等。
+
+*   下一篇推送我们将介绍PacketScope之LLM赋能的协议交互“零延迟”防御，敬请关注！
+
+*   我们期待与安全社区和互联网研究者一起携手交流，共同打造面向未来的协议栈安全基石。
+
+***
+
+**P.S.** 大家在安装或使用的过程中有任何问题，欢迎在Issues里面提问留言，作者们将在第一时间回复解答！
+

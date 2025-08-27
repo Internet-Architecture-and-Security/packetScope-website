@@ -16,17 +16,41 @@ Tracer 模块使用 eBPF 技术提供实时网络流量监控和细粒度追踪�
 
 此模块依赖 [BCC (BPF 编译器集合)](https://github.com/iovisor/bcc) 进行基于 eBPF 的内核级数据收集。
 
-### 系统要求
+### 🖥 系统要求
 
 - **操作系统**：Linux，内核版本 ≥ 6.8（支持 eBPF）
 - **权限**：需要 root/管理员访问权限
 - **Python**：Python 3.7 或更高版本
+- **依赖**：BCC (BPF Compiler Collection)
 
 ### 安装步骤
 <Steps>
 ##### 安装 BCC 依赖项
 
-   按照官方安装指南：[INSTALL.md](https://github.com/iovisor/bcc/blob/master/INSTALL.md)
+   按照官方安装指南：[INSTALL.md](https://github.com/iovisor/bcc/blob/master/INSTALL.md)。以 Ubuntu 22.04 (Jammy) 为例：
+
+```bash
+   # 安装基础依赖
+   sudo apt install -y zip bison build-essential cmake flex git libedit-dev \
+   libllvm14 llvm-14-dev libclang-14-dev python3 zlib1g-dev libelf-dev libfl-dev \
+   python3-setuptools liblzma-dev libdebuginfod-dev arping netperf iperf
+
+   # 下载 BCC 源码
+   git clone https://github.com/iovisor/bcc.git
+
+   # 编译安装 BCC
+   mkdir bcc/build && cd bcc/build
+   cmake ..
+   make
+   sudo make install
+
+   # 编译 Python3 绑定
+   cmake -DPYTHON_CMD=python3 ..
+   pushd src/python/
+   make
+   sudo make install
+   popd
+```
 
    对于常见发行版：
 
@@ -75,7 +99,7 @@ Tracer 模块使用 eBPF 技术提供实时网络流量监控和细粒度追踪�
    ulimit -n 32768
    ```
 
-##### 清理之前的数据并启动服务
+##### 启动服务
 
    ```bash
    # 激活虚拟环境
