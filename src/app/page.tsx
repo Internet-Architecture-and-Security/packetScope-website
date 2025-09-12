@@ -523,7 +523,7 @@ export default function Home() {
             <span className="text-blue-300 font-medium">Ready to Deploy</span>
           </div>
           
-          <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+          <h2 className="text-5xl leading-14 font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
             Start Protecting Your Network Today
           </h2>
           
