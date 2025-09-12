@@ -190,35 +190,6 @@ export default function Home() {
         containerClassName="absolute"
         className="absolute flex items-center flex-col justify-center px-2 md:px-10  py-4 w-full h-full"
       ></Vortex>
-        {/* <div className="absolute inset-0 z-10 h-full w-full bg-black/80 dark:bg-black/40" >
-      <ThreeDMarquee
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        images={["/Tracer.png", "/Analyzer.png", "/Guarder.png", "/Locator.png", "/Guarder1.png",
-          "/Guarder2.png",
-          "/Guarder3.png",
-          "/Guarder4.png",
-          "/Guarder5.png",
-          "/Tracer11.png",
-          "/Guarder7.png",
-          "/Guarder8.png",
-          "/Tracer22.png",
-          "/Guarder10.png",
-          "/Tracer3.png",
-          "/Guarder12.png",
-          "/Tracer0.png",
-          "/Tracer1.png",
-          "/Tracer2.png",
-          "/Tracer3.png",
-          "/Tracer4.png",
-          "/Tracer11.png",
-          "/Tracer22.png",
-          "/Tracer33.png",
-          "/Tracer44.png",
-          "Locator.png",
-          "/Analyzer.png",
-          "/Guarder.png",
-          ]}
-      /></div> */}
 
         {/* Enhanced Background Effects */}
         <div className="absolute z-10 inset-0 overflow-hidden">
@@ -246,12 +217,6 @@ export default function Home() {
             <Logo height="300" />
           </div>
 
-          {/* Main Title with enhanced typography */}
-          {/* <h1 className="text-7xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent leading-tight tracking-tight">
-            PacketScope
-          </h1> */}
-
-
           <p className="text-2xl md:text-3xl text-gray-300 mb-4 font-light tracking-wide">
             A Smart Armor for Server-Side Defense
           </p>
@@ -267,44 +232,12 @@ export default function Home() {
             Integrates performance optimization, anomaly diagnosis, and security defense with
             fine-grained tracing and intelligent analysis capabilities.
           </div>
-
-          {/* Enhanced Stats */}
-          {/* <div className="flex flex-col sm:flex-row justify-center items-center gap-8 mb-12">
-            <div className="flex items-center gap-2 text-yellow-400">
-              <Star className="w-5 h-5 fill-current" />
-              <span className="font-mono text-lg">{stats.stars.toLocaleString()}</span>
-              <span className="text-gray-400">stars</span>
-            </div>
-            <div className="flex items-center gap-2 text-green-400">
-              <Users className="w-5 h-5" />
-              <span className="font-mono text-lg">{stats.users.toLocaleString()}</span>
-              <span className="text-gray-400">users</span>
-            </div>
-            <div className="flex items-center gap-2 text-blue-400">
-              <Activity className="w-5 h-5" />
-              <span className="font-mono text-lg">{stats.packets.toLocaleString()}</span>
-              <span className="text-gray-400">packets analyzed</span>
-            </div>
-          </div> */}
-
-          {/* Enhanced CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href={`${getLangFromNavigator()}/docs/get-started`} className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
-              <Play className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              Get Started
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link href={"https://github.com/Internet-Architecture-and-Security/PacketScope"} className="group border-2 border-gray-600 hover:border-gray-400 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 hover:bg-gray-800/50 backdrop-blur-sm cursor-pointer">
-              <Github className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              View on GitHub
-            </Link>
-          </div>
         </div>
 
         {/* Enhanced Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-gray-600 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-gradient-to-b from-blue-400 to-transparent rounded-full mt-2 animate-pulse"></div>
+        <div className="absolute z-10 bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-gray-500/80 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-gradient-to-b from-blue-500 to-transparent rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
 
@@ -521,6 +454,43 @@ export default function Home() {
                 <span className="text-green-400 font-bold">$</span>
                 <span className="text-white">git clone https://github.com/your-org/packetscope.git</span>
               </div>
+              
+              {/* Server Modules Prerequisites */}
+              <div className="my-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Server className="w-4 h-4 text-blue-400" />
+                  <span className="text-blue-300 font-semibold text-sm">Start Server Modules</span>
+                </div>
+                <div className="text-gray-300 text-xs leading-relaxed mb-3">
+                  This project includes multiple server-side modules implemented in different languages. 
+                  Follow the instructions in each module's README.md to install dependencies and start services.
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="text-gray-400">
+                    <span className="text-purple-400">modules</span>
+                  </div>
+                  <div className="ml-2 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">├── Analyzer</span>
+                      <span className="text-gray-500"># Python-based protocol stack analysis module</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">├── Guarder</span>
+                      <span className="text-gray-500"># Go-based security policy module</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">├── Locator</span>
+                      <span className="text-gray-500"># Python-based network path mapping module</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400">└── Tracer</span>
+                      <span className="text-gray-500"># Python-based traffic monitoring and fine-grained tracing module</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Installation Steps */}
               <div className="flex items-center gap-4">
                 <span className="text-green-400 font-bold">$</span>
                 <span className="text-white">cd packetscope && npm install</span>
@@ -535,17 +505,60 @@ export default function Home() {
               </div>
             </div>
           </div>
-{/* 
-          <div className="mt-16 flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
-              <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              Download PacketScope
-            </button>
-            <button className="group border-2 border-gray-600 hover:border-gray-400 px-10 py-5 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3 hover:bg-gray-800/50 backdrop-blur-sm cursor-pointer">
-              <Code className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              View Documentation
-            </button>
-          </div> */}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-4 bg-gradient-to-br from-blue-900/20 via-purple-900/30 to-green-900/20 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/2 right-1/4 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute inset-0 backdrop-blur-sm"></div>
+        </div>
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full px-6 py-2 mb-8">
+            <Shield className="w-4 h-4 text-blue-400" />
+            <span className="text-blue-300 font-medium">Ready to Deploy</span>
+          </div>
+          
+          <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+            Start Protecting Your Network Today
+          </h2>
+          
+          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Join thousands of developers and security teams who trust PacketScope 
+            to secure their infrastructure with intelligent network monitoring.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Link href={`${getLangFromNavigator()}/docs/get-started`} className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-12 py-6 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
+              <Play className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              Get Started Now
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href={"https://github.com/Internet-Architecture-and-Security/PacketScope"} className="group border-2 border-gray-500/50 hover:border-gray-400 px-12 py-6 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 hover:bg-white/10 backdrop-blur-sm cursor-pointer">
+              <Github className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+              View on GitHub
+            </Link>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-400">
+            {/* <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-400 fill-current" />
+              <span className="font-medium">2.8k+ Stars</span>
+            </div> */}
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-green-400" />
+              <span className="font-medium">1.2k+ Users</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-400" />
+              <span className="font-medium">Enterprise Ready</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -564,13 +577,6 @@ export default function Home() {
                 <span>MIT License</span>
               </span>
             </div>
-            {/* <div className="flex items-center gap-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-800">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Contributing</a>
-            </div> */}
           </div>
         </div>
 
