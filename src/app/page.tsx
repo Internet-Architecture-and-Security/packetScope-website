@@ -421,7 +421,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Getting Started - Enhanced */}
+{/* Getting Started - Enhanced */}
       <section className="py-32 px-4 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-green-900/20 relative">
         <div className="absolute inset-0 backdrop-blur-sm"></div>
         <div className="max-w-5xl mx-auto text-center relative z-10">
@@ -433,9 +433,23 @@ export default function Home() {
             Deploy in Minutes
           </h2>
           <p className="text-xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed">
-            Get PacketScope up and running in just a few minutes. Start protecting your servers today.
+            Get PacketScope up and running with Docker Compose in just a few commands.
           </p>
 
+          {/* Prerequisites Notice */}
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 mb-8 text-left">
+            <div className="flex items-start gap-3">
+              <Server className="w-5 h-5 text-blue-400 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-blue-300 font-semibold mb-2">Prerequisites</h3>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  Ensure Docker (v20.10+) and Docker Compose (v2.0+) are installed on your system.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Terminal Section */}
           <div className="bg-gray-800/80 backdrop-blur-sm p-10 rounded-3xl border border-gray-700 text-left shadow-2xl">
             <div className="flex items-center gap-4 mb-8">
               <div className="flex gap-2">
@@ -446,68 +460,122 @@ export default function Home() {
               <span className="text-gray-400 font-medium">Terminal</span>
               <div className="ml-auto flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-green-300 text-sm">Connected</span>
+                <span className="text-green-300 text-sm">Ready</span>
               </div>
             </div>
-            <div className="space-y-4 font-mono text-sm">
-              <div className="flex items-center gap-4">
-                <span className="text-green-400 font-bold">$</span>
-                <span className="text-white">git clone https://github.com/your-org/packetscope.git</span>
-              </div>
-              
-              {/* Server Modules Prerequisites */}
-              <div className="my-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <Server className="w-4 h-4 text-blue-400" />
-                  <span className="text-blue-300 font-semibold text-sm">Start Server Modules</span>
+            
+            <div className="space-y-6 font-mono text-sm">
+              {/* Step 1: Clone */}
+              <div>
+                <div className="text-gray-400 text-xs mb-2">Step 1: Clone the repository</div>
+                <div className="flex items-center gap-4">
+                  <span className="text-green-400 font-bold">$</span>
+                  <span className="text-white">git clone https://github.com/Internet-Architecture-and-Security/PacketScope.git</span>
                 </div>
-                <div className="text-gray-300 text-xs leading-relaxed mb-3">
-                  This project includes multiple server-side modules implemented in different languages. 
-                  Follow the instructions in each module's README.md to install dependencies and start services.
-                </div>
-                <div className="space-y-2 text-xs">
-                  <div className="text-gray-400">
-                    <span className="text-purple-400">modules</span>
-                  </div>
-                  <div className="ml-2 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-400">├── Analyzer</span>
-                      <span className="text-gray-500"># Python-based protocol stack analysis module</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-400">├── Guarder</span>
-                      <span className="text-gray-500"># Go-based security policy module</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-400">├── Locator</span>
-                      <span className="text-gray-500"># Python-based network path mapping module</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-400">└── Tracer</span>
-                      <span className="text-gray-500"># Python-based traffic monitoring and fine-grained tracing module</span>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-4 mt-1">
+                  <span className="text-green-400 font-bold">$</span>
+                  <span className="text-white">cd PacketScope</span>
                 </div>
               </div>
 
-              {/* Main Installation Steps */}
-              <div className="flex items-center gap-4">
-                <span className="text-green-400 font-bold">$</span>
-                <span className="text-white">cd packetscope && npm install</span>
+              {/* Step 2: Deploy */}
+              <div>
+                <div className="text-gray-400 text-xs mb-2">Step 2: Run deployment script</div>
+                <div className="flex items-center gap-4">
+                  <span className="text-green-400 font-bold">$</span>
+                  <span className="text-white">sudo bash starter.sh</span>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-green-400 font-bold">$</span>
-                <span className="text-white">npm run preview</span>
+
+              {/* What happens */}
+              <div className="my-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="w-4 h-4 text-purple-400" />
+                  <span className="text-purple-300 font-semibold text-sm">Automated Deployment Process</span>
+                </div>
+                <div className="space-y-1 text-xs text-gray-300">
+                  <div>✓ Check Docker environment</div>
+                  <div>✓ Stop existing services</div>
+                  <div>✓ Build all service containers</div>
+                  <div>✓ Start services in correct order</div>
+                  <div>✓ Display service status and access info</div>
+                </div>
               </div>
-              <div className="text-gray-400 ml-8 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-blue-400" />
-                <span>Application running at http://localhost:4173/</span>
+
+              {/* Step 3: Access */}
+              <div>
+                <div className="text-gray-400 text-xs mb-2">Step 3: Access the application</div>
+                <div className="flex items-center gap-2 text-blue-400">
+                  <Globe className="w-4 h-4" />
+                  <span>http://localhost:4173/</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Service Management */}
+          <div className="mt-8 grid md:grid-cols-2 gap-4 text-left">
+            <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-gray-700">
+              <h3 className="text-blue-300 font-semibold mb-3 flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Service Management
+              </h3>
+              <div className="space-y-2 font-mono text-xs text-gray-300">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400">$</span>
+                  <div>
+                    <div>sudo docker compose ps</div>
+                    <div className="text-gray-500 text-[10px]">View service status</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400">$</span>
+                  <div>
+                    <div>sudo docker compose logs -f</div>
+                    <div className="text-gray-500 text-[10px]">View all logs</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400">$</span>
+                  <div>
+                    <div>sudo docker compose down</div>
+                    <div className="text-gray-500 text-[10px]">Stop all services</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-gray-700">
+              <h3 className="text-green-300 font-semibold mb-3 flex items-center gap-2">
+                <Network className="w-4 h-4" />
+                Service Endpoints
+              </h3>
+              <div className="space-y-2 text-xs text-gray-300">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Web UI</span>
+                  <span className="text-green-400">:4173</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Guarder API</span>
+                  <span className="text-green-400">:8080</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Tracer API</span>
+                  <span className="text-green-400">:8000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Analyzer-Monitor</span>
+                  <span className="text-green-400">:5000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Analyzer-Protocol</span>
+                  <span className="text-green-400">:19999</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
       {/* CTA Section */}
       <section className="py-24 px-4 bg-gradient-to-br from-blue-900/20 via-purple-900/30 to-green-900/20 relative overflow-hidden">
         {/* Background Effects */}

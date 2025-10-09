@@ -6,41 +6,226 @@ import { Steps } from 'nextra/components'
 
 <iframe height={500} width={800} src="//player.bilibili.com/player.html?isOutside=true&aid=115099989710545&bvid=BV1LZe2zfE1m&cid=25849958746&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 
-## 启动服务端模块
+## 前置要求
+
+开始之前，请确保您的系统已安装并运行 Docker：
+
+- **Docker**：版本 20.10 或更高
+- **Docker Compose**：版本 2.0 或更高
+
+验证 Docker 安装：
+
+```bash
+docker --version
+docker compose version
+```
+
+如果尚未安装 Docker，请访问 [Docker 官方网站](https://docs.docker.com/get-docker/) 获取安装说明。
+
+## 一键部署（推荐）
+
+PacketScope 提供了便捷的部署脚本，可使用 Docker Compose 自动构建并启动所有服务。
+
+<Steps>
+
+### 克隆仓库
+
+```bash
+git clone https://github.com/Internet-Architecture-and-Security/PacketScope.git
+cd PacketScope
+```
+
+### 运行部署脚本
+
+使用 root 权限执行启动脚本：
+
+```bash
+sudo bash starter.sh
+```
+
+该脚本将自动完成以下操作：
+- ✓ 检查 Docker 环境
+- ✓ 停止现有服务
+- ✓ 按正确顺序构建所有服务容器
+- ✓ 启动所有服务
+- ✓ 显示服务状态和访问信息
+
+### 访问应用
+
+部署完成后，打开浏览器访问：
+
+```
+http://localhost:4173/
+```
+
+</Steps>
+
+## 服务端点
+
+部署成功后，以下服务将可用：
+
+| 服务 | 端口 | 访问地址 |
+|------|------|----------|
+| Web UI | 4173 | http://localhost:4173 |
+| Guarder API | 8080 | http://localhost:8080 |
+| Tracer API | 8000 | http://localhost:8000 |
+| Analyzer-Monitor API | 5000 | http://localhost:5000 |
+| Analyzer-ProtocolStack API | 19999 | http://localhost:19999 |
+
+## 服务管理
+
+### 查看服务状态
+
+```bash
+sudo docker compose ps
+```
+
+### 查看服务日志
+
+查看所有服务的日志：
+```bash
+sudo docker compose logs -f
+```
+
+查看特定服务的日志：
+```bash
+sudo docker compose logs -f <服务名称>
+```
+
+可用的服务名称：
+- `web-ui` - 前端界面
+- `guarder` - 安全防护模块
+- `tracer` - 网络追踪模块
+- `analyzer-monitor` - 流量监控模块
+- `analyzer-protocolstack` - 协议栈分析模块
+
+### 停止所有服务
+
+```bash
+sudo docker compose down
+```
+
+### 重启服务
+
+重启所有服务：
+```bash
+sudo docker compose restart
+```
+
+重启特定服务：
+```bash
+sudo docker compose restart <服务名称>
+```
+
+### 更新服务
+
+如果代码有更新，需要重新构建和部署：
+
+```bash
+# 停止并移除现有容器
+sudo docker compose down
+
+# 重新构建并启动
+sudo bash starter.sh
+```
+
+或者只重新构建特定服务：
+
+```bash
+sudo docker compose up -d --build <服务名称>
+```
+
+## 手动部署（可选）
+
+如果您需要手动部署或进行高级配置，可以参考以下步骤。
+
+### 启动服务端模块
 
 本项目包含多个用不同语言实现的服务端模块。请参照每个模块的 `README.md` 文件安装依赖并启动服务。
 
 ```bash
 modules
 ├── Analyzer  # 基于 Python 的协议栈分析模块
+│   ├── Monitor/           # 流量监控子模块
+│   └── ProtocolStack/     # 协议分析子模块
 ├── Guarder   # 基于 Go 的安全策略模块
-├── Locator   # 基于 Python 的网络路径映射模块
-└── Tracer    # 基于 Python 的流量监控和细粒度追踪模块
+└── Tracer    # 基于 Python 的网络路径映射模块
 ```
 
-## 启动前端服务
+#### Analyzer 模块
+
+Analyzer 模块包含两个子模块：Monitor 和 ProtocolStack。
+
+进入 Monitor 目录：
+```bash
+cd modules/Analyzer/Monitor
+```
+
+安装依赖并启动：
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+进入 ProtocolStack 目录：
+```bash
+cd modules/Analyzer/ProtocolStack
+```
+
+安装依赖并启动：
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+#### Guarder 模块
+
+进入 Guarder 目录：
+```bash
+cd modules/Guarder
+```
+
+安装依赖并启动：
+```bash
+go mod download
+go run main.go
+```
+
+#### Tracer 模块
+
+进入 Tracer 目录：
+```bash
+cd modules/Tracer
+```
+
+安装依赖并启动：
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+### 启动前端服务
 
 <Steps>
 
 前端基于 [Node.js](https://nodejs.org/en) 构建。请确保已安装 Node.js（版本 ≥ 16）。
 
-### 安装依赖
+#### 安装依赖
 
 在项目根目录运行以下命令：
 
 ```sh npm2yarn
 npm install
 ```
+
 > [!NOTE]
 >
 > 中国大陆用户可设置 npm 镜像以加速安装：
 > ```bash
 > npm config set registry http://registry.npmmirror.com
 > ```
->
 
-
-### 启动预览服务器
+#### 启动预览服务器
 
 ```sh npm2yarn
 npm run preview
@@ -48,25 +233,142 @@ npm run preview
 
 应用程序默认在本地端口 `4173` 运行。
 
-### 访问应用
+#### 访问应用
 
 打开浏览器并访问：
 
 ```
 http://127.0.0.1:4173/
 ```
+
+</Steps>
+
 > [!TIP]
 >
 > 要在开发模式下运行并启用热重载，请使用以下命令：
+>
+> ```sh npm2yarn
+> npm run dev
+> ```
 
-```sh npm2yarn
-npm run dev
-```
 > [!TIP]
 >
 > 要构建生产版本，请使用以下命令：
+>
+> ```sh npm2yarn
+> npm run build
+> ```
 
-```sh npm2yarn
-npm run build
+## 常见问题
+
+### Docker 权限问题
+
+如果遇到 Docker 权限错误，请确保您的用户在 docker 组中：
+
+```bash
+sudo usermod -aG docker $USER
 ```
-</Steps>
+
+然后重新登录或运行：
+
+```bash
+newgrp docker
+```
+
+### 端口冲突
+
+如果默认端口被占用，您可以：
+
+1. 检查占用端口的进程：
+```bash
+sudo lsof -i :4173
+```
+
+2. 停止占用端口的进程，或在 `docker-compose.yml` 中修改端口映射
+
+### 服务无法启动
+
+1. 检查 Docker 日志以诊断问题：
+```bash
+sudo docker compose logs <服务名称>
+```
+
+2. 确保所有必需的端口未被占用
+
+3. 验证 Docker 和 Docker Compose 版本是否符合要求
+
+### 构建失败
+
+如果构建过程中出现错误：
+
+1. 清理 Docker 缓存：
+```bash
+sudo docker system prune -a
+```
+
+2. 重新构建：
+```bash
+sudo bash starter.sh
+```
+
+### 网络连接问题
+
+如果前端无法连接到后端服务：
+
+1. 检查所有服务是否正常运行：
+```bash
+sudo docker compose ps
+```
+
+2. 验证服务端口是否正确映射
+
+3. 检查防火墙设置是否阻止了端口访问
+
+### 性能问题
+
+如果服务运行缓慢：
+
+1. 检查系统资源使用情况：
+```bash
+sudo docker stats
+```
+
+2. 增加 Docker 可用资源（内存、CPU）
+
+3. 检查日志中是否有错误或警告信息
+
+## 故障排除
+
+### 完全重置
+
+如果遇到无法解决的问题，可以完全重置环境：
+
+```bash
+# 停止并删除所有容器
+sudo docker compose down -v
+
+# 删除所有相关镜像
+sudo docker images | grep packetscope | awk '{print $3}' | xargs sudo docker rmi -f
+
+# 重新部署
+sudo bash starter.sh
+```
+
+### 获取帮助
+
+如需更多帮助，请：
+
+1. 查看 [GitHub Issues](https://github.com/Internet-Architecture-and-Security/PacketScope/issues)
+2. 查看各模块的详细文档
+3. 提交新的 Issue 并附上详细的错误日志
+
+## 下一步
+
+成功部署 PacketScope 后，您可以：
+
+- 📊 探索 [Analyzer 模块](/docs/modules/analyzer) - 分析协议栈性能
+- 🔍 使用 [Tracer 模块](/docs/modules/tracer) - 追踪网络路径
+- 🛡️ 配置 [Guarder 模块](/docs/modules/guarder) - 设置安全策略
+- 📚 阅读 [用户指南](/docs/user-guide) - 了解更多功能
+
+祝您使用愉快！

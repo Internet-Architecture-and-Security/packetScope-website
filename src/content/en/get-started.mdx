@@ -1,68 +1,374 @@
 import { Steps } from 'nextra/components'
 
-# Get Started
+# Getting Started
 
-## Start Server Modules
+## Installation Video
 
-This project includes multiple server-side modules implemented in different languages. Follow the instructions in each module’s `README.md` to install dependencies and start services.
+<iframe height={500} width={800} src="//player.bilibili.com/player.html?isOutside=true&aid=115099989710545&bvid=BV1LZe2zfE1m&cid=25849958746&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+## Prerequisites
+
+Before getting started, ensure Docker is installed and running on your system:
+
+- **Docker**: Version 20.10 or higher
+- **Docker Compose**: Version 2.0 or higher
+
+Verify Docker installation:
+
+```bash
+docker --version
+docker compose version
+```
+
+If Docker is not installed, visit the [Docker Official Website](https://docs.docker.com/get-docker/) for installation instructions.
+
+## One-Click Deployment (Recommended)
+
+PacketScope provides a convenient deployment script that automatically builds and starts all services using Docker Compose.
+
+<Steps>
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Internet-Architecture-and-Security/PacketScope.git
+cd PacketScope
+```
+
+### Run the Deployment Script
+
+Execute the startup script with root privileges:
+
+```bash
+sudo bash starter.sh
+```
+
+The script will automatically complete the following operations:
+- ✓ Check Docker environment
+- ✓ Stop existing services
+- ✓ Build all service containers in the correct order
+- ✓ Start all services
+- ✓ Display service status and access information
+
+### Access the Application
+
+After deployment is complete, open your browser and visit:
+
+```
+http://localhost:4173/
+```
+
+</Steps>
+
+## Service Endpoints
+
+After successful deployment, the following services will be available:
+
+| Service | Port | Access URL |
+|---------|------|------------|
+| Web UI | 4173 | http://localhost:4173 |
+| Guarder API | 8080 | http://localhost:8080 |
+| Tracer API | 8000 | http://localhost:8000 |
+| Analyzer-Monitor API | 5000 | http://localhost:5000 |
+| Analyzer-ProtocolStack API | 19999 | http://localhost:19999 |
+
+## Service Management
+
+### View Service Status
+
+```bash
+sudo docker compose ps
+```
+
+### View Service Logs
+
+View logs for all services:
+```bash
+sudo docker compose logs -f
+```
+
+View logs for a specific service:
+```bash
+sudo docker compose logs -f <service-name>
+```
+
+Available service names:
+- `web-ui` - Frontend interface
+- `guarder` - Security protection module
+- `tracer` - Network tracing module
+- `analyzer-monitor` - Traffic monitoring module
+- `analyzer-protocolstack` - Protocol stack analysis module
+
+### Stop All Services
+
+```bash
+sudo docker compose down
+```
+
+### Restart Services
+
+Restart all services:
+```bash
+sudo docker compose restart
+```
+
+Restart a specific service:
+```bash
+sudo docker compose restart <service-name>
+```
+
+### Update Services
+
+If there are code updates, you need to rebuild and redeploy:
+
+```bash
+# Stop and remove existing containers
+sudo docker compose down
+
+# Rebuild and start
+sudo bash starter.sh
+```
+
+Or rebuild only a specific service:
+
+```bash
+sudo docker compose up -d --build <service-name>
+```
+
+## Manual Deployment (Optional)
+
+If you need manual deployment or advanced configuration, you can refer to the following steps.
+
+### Starting Server Modules
+
+This project contains multiple server-side modules implemented in different languages. Please refer to the `README.md` file in each module to install dependencies and start services.
 
 ```bash
 modules
 ├── Analyzer  # Python-based protocol stack analysis module
+│   ├── Monitor/           # Traffic monitoring submodule
+│   └── ProtocolStack/     # Protocol analysis submodule
 ├── Guarder   # Go-based security policy module
-├── Locator   # Python-based network path mapping module
-└── Tracer    # Python-based traffic monitoring and fine-grained tracing module
+└── Tracer    # Python-based network path mapping module
 ```
 
-## Start Frontend Service
+#### Analyzer Module
+
+The Analyzer module contains two submodules: Monitor and ProtocolStack.
+
+Enter the Monitor directory:
+```bash
+cd modules/Analyzer/Monitor
+```
+
+Install dependencies and start:
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Enter the ProtocolStack directory:
+```bash
+cd modules/Analyzer/ProtocolStack
+```
+
+Install dependencies and start:
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+#### Guarder Module
+
+Enter the Guarder directory:
+```bash
+cd modules/Guarder
+```
+
+Install dependencies and start:
+```bash
+go mod download
+go run main.go
+```
+
+#### Tracer Module
+
+Enter the Tracer directory:
+```bash
+cd modules/Tracer
+```
+
+Install dependencies and start:
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+### Starting the Frontend Service
 
 <Steps>
 
-The frontend is built on [Node.js](https://nodejs.org/en). Please ensure Node.js (version ≥ 16) is installed.
+The frontend is built with [Node.js](https://nodejs.org/en). Ensure Node.js (version ≥ 16) is installed.
 
-### Install Dependencies
+#### Install Dependencies
 
-Run the following command in the project root:
+Run the following command in the project root directory:
 
 ```sh npm2yarn
 npm install
 ```
+
 > [!NOTE]
 >
-> For users in mainland China, set npm mirror to speed up installation:
+> Users in mainland China can set up an npm mirror to speed up installation:
 > ```bash
 > npm config set registry http://registry.npmmirror.com
 > ```
->
 
-
-### Start Preview Server
+#### Start the Preview Server
 
 ```sh npm2yarn
 npm run preview
 ```
 
-The application runs locally by default on port `4173`.
+The application runs on local port `4173` by default.
 
-### Access the App
+#### Access the Application
 
 Open your browser and visit:
 
 ```
 http://127.0.0.1:4173/
 ```
-> [!TIP]
->
-> To run in development mode with hot reloading, use the following command:
 
-```sh npm2yarn
-npm run dev
-```
-> [!TIP]
->
-> To build the project for production, use the following command:
-
-```sh npm2yarn
-npm run build
-```
 </Steps>
+
+> [!TIP]
+>
+> To run in development mode with hot reload enabled, use the following command:
+>
+> ```sh npm2yarn
+> npm run dev
+> ```
+
+> [!TIP]
+>
+> To build for production, use the following command:
+>
+> ```sh npm2yarn
+> npm run build
+> ```
+
+## Common Issues
+
+### Docker Permission Issues
+
+If you encounter Docker permission errors, ensure your user is in the docker group:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Then log out and log back in, or run:
+
+```bash
+newgrp docker
+```
+
+### Port Conflicts
+
+If default ports are occupied, you can:
+
+1. Check which process is using the port:
+```bash
+sudo lsof -i :4173
+```
+
+2. Stop the process using the port, or modify the port mapping in `docker-compose.yml`
+
+### Service Fails to Start
+
+1. Check Docker logs to diagnose the issue:
+```bash
+sudo docker compose logs <service-name>
+```
+
+2. Ensure all required ports are not occupied
+
+3. Verify that Docker and Docker Compose versions meet the requirements
+
+### Build Failures
+
+If errors occur during the build process:
+
+1. Clean Docker cache:
+```bash
+sudo docker system prune -a
+```
+
+2. Rebuild:
+```bash
+sudo bash starter.sh
+```
+
+### Network Connection Issues
+
+If the frontend cannot connect to backend services:
+
+1. Check if all services are running properly:
+```bash
+sudo docker compose ps
+```
+
+2. Verify that service ports are correctly mapped
+
+3. Check if firewall settings are blocking port access
+
+### Performance Issues
+
+If services are running slowly:
+
+1. Check system resource usage:
+```bash
+sudo docker stats
+```
+
+2. Increase available Docker resources (memory, CPU)
+
+3. Check logs for errors or warning messages
+
+## Troubleshooting
+
+### Complete Reset
+
+If you encounter unresolvable issues, you can completely reset the environment:
+
+```bash
+# Stop and delete all containers
+sudo docker compose down -v
+
+# Delete all related images
+sudo docker images | grep packetscope | awk '{print $3}' | xargs sudo docker rmi -f
+
+# Redeploy
+sudo bash starter.sh
+```
+
+### Get Help
+
+For additional help, please:
+
+1. Check [GitHub Issues](https://github.com/Internet-Architecture-and-Security/PacketScope/issues)
+2. Review detailed documentation for each module
+3. Submit a new Issue with detailed error logs
+
+## Next Steps
+
+After successfully deploying PacketScope, you can:
+
+- 📊 Explore [Analyzer Module](/docs/modules/analyzer) - Analyze protocol stack performance
+- 🔍 Use [Tracer Module](/docs/modules/tracer) - Trace network paths
+- 🛡️ Configure [Guarder Module](/docs/modules/guarder) - Set up security policies
+- 📚 Read [User Guide](/docs/user-guide) - Learn more features
+
+Enjoy using PacketScope!

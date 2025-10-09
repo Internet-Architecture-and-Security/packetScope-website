@@ -1,6 +1,9 @@
 export default {
   index: 'Introduction',
   'get-started': '',
-  'server-modules': "Server Modules",
+  'server-modules': {
+    title: 'Server Modules',
+    display: 'hidden'
+  },
   tutorials: '',
 }
