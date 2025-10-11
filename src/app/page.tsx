@@ -75,7 +75,7 @@ export default function Home() {
     setTimeout(animateStats, 1000);
 
     const interval = setInterval(() => {
-      setActiveFeature(prev => (prev + 1) % 4);
+      setActiveFeature(prev => (prev + 1) % features.length);
     }, 4000);
 
     return () => clearInterval(interval);
@@ -84,30 +84,12 @@ export default function Home() {
   const features = [
     {
       icon: Eye,
-      title: "Tracer",
-      subtitle: "Traffic Monitoring & Fine-grained Tracing",
-      description: "Track connection/packet interactions through the protocol stack and generate detailed visual path maps",
+      title: "Analyzer",
+      subtitle: "Protocol Stack Analysis & Visualization Engine",
+      description: "Acquires packets passing through network interfaces and provides multidimensional statistics including traffic, latency, and packet loss. Tracks functional interactions and generates detailed visualized call path diagrams for interactive protocol layer exploration.",
       color: "from-blue-500 to-cyan-500",
       highlight: "Real-time visibility",
       img: 'Tracer.png',
-    },
-    {
-      icon: BarChart3,
-      title: "Analyzer",
-      subtitle: "Protocol Stack Analysis Engine",
-      description: "Provide multi-dimensional statistics on packet movement including traffic, latency, and cross-layer interactions",
-      color: "from-purple-500 to-pink-500",
-      highlight: "Deep insights",
-      img: 'Analyzer.png',
-    },
-    {
-      icon: MapPin,
-      title: "Locator",
-      subtitle: "Network Path Mapping Module",
-      description: "Map routes and latency from host to any global IP address, displaying data on global topology",
-      color: "from-green-500 to-emerald-500",
-      highlight: "Global mapping",
-      img: 'locator.png',
     },
     {
       icon: ShieldCheck,
@@ -117,7 +99,16 @@ export default function Home() {
       color: "from-orange-500 to-red-500",
       highlight: "AI-powered defense",
       img: 'guarder.png',
-    }
+    },
+    {
+      icon: MapPin,
+      title: "Tracer",
+      subtitle: "Network Path Mapping Module",
+      description: "Map routes and latency from host to any global IP address, displaying data on global topology",
+      color: "from-green-500 to-emerald-500",
+      highlight: "Global mapping",
+      img: 'locator.png',
+    },
   ];
 
   const painPoints = [
@@ -318,103 +309,94 @@ export default function Home() {
       </section>
 
       {/* Feature Modules - Enhanced */}
-      <section className="py-24 px-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      <section className="py-32 px-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
         {/* 背景装饰 */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.1),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_60%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.15),transparent_60%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_70%)]"></div>
 
-        <div className="max-w-6xl mx-auto relative z-10">
+        <div className="max-w-7xl mx-auto relative z-10">
           {/* 标题区域 */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 mb-6">
-              <Cpu className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-300 font-medium text-sm">Network Intelligence</span>
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 bg-purple-500/10 backdrop-blur-sm border border-purple-500/20 rounded-full px-6 py-2.5 mb-8">
+              <Cpu className="w-5 h-5 text-purple-400" />
+              <span className="text-purple-300 font-semibold text-sm tracking-wide">Network Intelligence</span>
             </div>
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+            <h2 className="text-5xl leading-14 font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
               Comprehensive Monitoring Suite
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-              Four integrated modules providing end-to-end network visibility and protection
+            <p className="text-gray-300 max-w-3xl mx-auto text-xl leading-relaxed">
+              Three integrated modules providing end-to-end network visibility and protection
             </p>
           </div>
 
           {/* 主要内容区域 */}
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="grid lg:grid-cols-12 gap-10 items-center">
             {/* 功能选择区域 */}
-            <div className="lg:col-span-5 space-y-3">
+            <div className="lg:col-span-5 space-y-4">
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className={`group cursor-pointer p-3 rounded-xl border transition-all duration-300 ${activeFeature === index
-                    ? 'bg-white/5 border-white/20 shadow-lg'
-                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.03] hover:border-white/10'
+                  className={`group cursor-pointer p-5 rounded-2xl border transition-all duration-500 ${activeFeature === index
+                    ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/30 shadow-2xl shadow-purple-500/20 scale-[1.02]'
+                    : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 hover:shadow-xl hover:shadow-blue-500/10'
                     }`}
                   onClick={() => setActiveFeature(index)}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`flex items-center justify-center w-11 h-11 rounded-lg bg-gradient-to-r ${feature.color} shadow-lg`}>
-                      <feature.icon className="w-5 h-5 text-white" />
+                  <div className="flex items-start gap-4">
+                    <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
+                      <feature.icon className="w-7 h-7 text-white" />
                     </div>
-                    <div className="flex-1">
-
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-bold text-white">{feature.title}</h3>
-                        <span className="bg-blue-500/20 text-blue-300 text-xs font-medium px-2 py-1 rounded-full">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-white">{feature.title}</h3>
+                        <span className={`bg-gradient-to-r ${feature.color} bg-opacity-20 text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap`}>
                           {feature.highlight}
                         </span>
                       </div>
-                      <p className="text-gray-400 text-sm mb-1">{feature.subtitle}</p>
-                      <p className="text-blue-200 leading-relaxed text-[12px] transform ">
-                    {feature.description}
-                  </p>
+                      <p className="text-gray-300 text-sm font-medium mb-2.5">{feature.subtitle}</p>
+                      <p className="text-gray-400 leading-relaxed text-sm">
+                        {feature.description}
+                      </p>
                     </div>
-                    
-                    <div className={`w-2 h-2 rounded-full transition-all duration-300 ${activeFeature === index ? `bg-gradient-to-r ${feature.color}` : 'bg-gray-600'
+                    <div className={`w-3 h-3 rounded-full transition-all duration-300 flex-shrink-0 mt-1 ${activeFeature === index ? `bg-gradient-to-r ${feature.color} shadow-lg` : 'bg-gray-600'
                       }`}></div>
                   </div>
                 </div>
               ))}
-
             </div>
 
             {/* 图片展示区域 */}
             <div className="lg:col-span-7">
-              <div className="relative">
-                {/* 主图片容器 */}
-                <div className="relative h-130 rounded-xl overflow-hidden bg-gray-900/30">
+              <div className="relative group">
+                {/* 主图片容器 - 纯净展示 */}
+                <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-white/10 shadow-2xl">
                   <FeatheredContainer
                     src={features[activeFeature].img}
                     alt={`${features[activeFeature].title} interface`}
-                    className="transition-all duration-500 ease-out"
+                    className="transition-all duration-700 ease-out w-full h-full object-cover"
                   />
-
-                  {/* 底部标签 */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-
-                    {/* 导航点 */}
-                    {/* <div className="flex gap-2">
-                      {features.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setActiveFeature(index)}
-                          className={`w-2 h-2 rounded-full transition-all duration-300 ${activeFeature === index
-                              ? 'bg-white scale-125'
-                              : 'bg-white/40 hover:bg-white/60'
-                            }`}
-                        />
-                      ))}
-                    </div> */}
-
+                  
+                  {/* 导航点 - 移到图片外部底部 */}
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
+                    {features.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveFeature(idx)}
+                        className={`h-2 rounded-full transition-all duration-300 ${activeFeature === idx
+                            ? 'bg-white w-8'
+                            : 'bg-white/40 hover:bg-white/60 w-2'
+                          }`}
+                      />
+                    ))}
                   </div>
-
                 </div>
-                {/* <div className='absolute bottom-0 w-full h-16 bg-black/50 backdrop-blur-xs p-2 box-border rounded-b-xl'>
-                  <p className="text-blue-200 leading-relaxed text-sm font-bold text-justify">
-                    {features[activeFeature].description}
-                  </p>
-                </div> */}
-                {/* 动态光效 */}
-                <div className={`absolute -inset-4 bg-gradient-to-r ${features[activeFeature].color} opacity-20 blur-2xl rounded-2xl transition-all duration-500 -z-10`}></div>
+
+                {/* 动态光效 - 增强版 */}
+                <div className={`absolute -inset-6 bg-gradient-to-r ${features[activeFeature].color} opacity-30 blur-3xl rounded-3xl transition-all duration-700 -z-10 group-hover:opacity-40`}></div>
+                
+                {/* 边缘高光效果 */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
               </div>
             </div>
           </div>
@@ -614,10 +596,6 @@ export default function Home() {
 
           {/* Trust indicators */}
           <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-400">
-            {/* <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
-              <span className="font-medium">2.8k+ Stars</span>
-            </div> */}
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-green-400" />
               <span className="font-medium">1.2k+ Users</span>
@@ -650,7 +628,7 @@ export default function Home() {
 
         {/* Floating action button */}
         <div className="fixed bottom-8 right-8 z-50">
-          <button   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 w-14 h-14 rounded-full shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center group hover:scale-110">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 w-14 h-14 rounded-full shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center group hover:scale-110">
             <ChevronRight className="w-6 h-6 text-white -rotate-90 group-hover:-translate-y-1 transition-transform" />
           </button>
         </div>
