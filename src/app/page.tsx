@@ -33,6 +33,7 @@ import { ThreeDMarquee } from "@/components/ui/3d-marquee";
 import FeatheredContainer from '@/components/FeatheredContainer';
 import Vortex from '@/components/ui/Vortex';
 import Link from 'next/link';
+import TargetCursor from '@/components/TargetCursor';
 
 
 export default function Home() {
@@ -169,6 +170,13 @@ export default function Home() {
   ];
 
   return (
+    <div>
+    <TargetCursor 
+      spinDuration={2}
+      hideDefaultCursor={false}
+      parallaxOn
+hoverDuration={0.2}
+/>
     <div className="min-h-screen bg-gray-900 text-white overflow-x-hidden">
 
       {/* Hero Section */}
@@ -254,7 +262,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {painPoints.map((point, index) => (
-              <div key={index} className="group bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm p-8 rounded-3xl border border-gray-700 hover:border-red-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/10 hover:-translate-y-2">
+              <div key={index} className="cursor-target group bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm p-8 rounded-3xl border border-gray-700 hover:border-red-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-red-500/10 ">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                     <point.icon className="w-8 h-8 text-white" />
@@ -292,7 +300,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {capabilities.map((capability, index) => (
-              <div key={index} className="group bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm p-8 rounded-3xl border border-gray-700 hover:border-blue-500/50 transition-all duration-500 hover:shadow-xl hover:-translate-y-2">
+              <div key={index} className="cursor-target group bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm p-8 rounded-3xl border border-gray-700 hover:border-blue-500/50 transition-all duration-500 hover:shadow-xl">
                 <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
                   <capability.icon className="w-8 h-8 text-white" />
                 </div>
@@ -337,7 +345,7 @@ export default function Home() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className={`group cursor-pointer p-5 rounded-2xl border transition-all duration-500 ${activeFeature === index
+                  className={`cursor-target group cursor-pointer p-5 rounded-2xl border transition-all duration-500 ${activeFeature === index
                     ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/30 shadow-2xl shadow-purple-500/20 scale-[1.02]'
                     : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20 hover:shadow-xl hover:shadow-blue-500/10'
                     }`}
@@ -583,12 +591,12 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Link href={`${getLangFromNavigator()}/docs/get-started`} className="group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-12 py-6 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
+            <Link href={`${getLangFromNavigator()}/docs/get-started`} className="cursor-target group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-12 py-6 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 hover:-translate-y-1 cursor-pointer">
               <Play className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               Get Started Now
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href={"https://github.com/Internet-Architecture-and-Security/PacketScope"} className="group border-2 border-gray-500/50 hover:border-gray-400 px-12 py-6 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 hover:bg-white/10 backdrop-blur-sm cursor-pointer">
+            <Link href={"https://github.com/Internet-Architecture-and-Security/PacketScope"} className="cursor-target group border-2 border-gray-500/50 hover:border-gray-400 px-12 py-6 rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center gap-3 hover:bg-white/10 backdrop-blur-sm cursor-pointer">
               <Github className="w-6 h-6 group-hover:rotate-12 transition-transform" />
               View on GitHub
             </Link>
@@ -596,6 +604,10 @@ export default function Home() {
 
           {/* Trust indicators */}
           <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-400">
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-400" />
+              <span className="font-medium"> 1.6k+ Stars</span>
+            </div>
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-green-400" />
               <span className="font-medium">1.2k+ Users</span>
@@ -616,7 +628,7 @@ export default function Home() {
             <div className="flex items-center gap-6 text-gray-400 mb-4 md:mb-0">
               <span className="flex items-center gap-2">
                 <span>©</span>
-                <span>2025 PacketScope</span>
+                <span>{new Date().getFullYear()} PacketScope</span>
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
@@ -650,6 +662,6 @@ export default function Home() {
           transform: scale(1.02);
         }
       `}</style>
-    </div>
+    </div>    </div>
   );
 }
